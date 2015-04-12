@@ -11,7 +11,6 @@ from pprint import pprint
 
 class ClientUI:
     def __init__(self, master, queue, send_command):
-        # super(ClientUI, self).__init__()
         self.queue = queue
         self.send_command = send_command
         self.master = master
@@ -27,22 +26,6 @@ class ClientUI:
         italic_font = Font(self.output_panel, self.output_panel.cget("font"))
         italic_font.configure(slant='italic')
         self.output_panel.tag_configure("italic", font=italic_font)
-
-        # while True:
-        #     self.draw_output()
-        #     sleep(0)
-        # pprint(self.output_panel)
-
-    # def get_output(self):
-    #     buffer = str(self.socket.recv(4096), encoding='utf8').split("\r\n")
-    #     pprint(buffer)
-    #     for line in buffer:
-    #         line.strip()
-    #
-    #         if line == '':
-    #             continue
-    #
-    #         self.draw_output()
 
     def draw_output(self, line):
         self.output_panel.configure(state="normal")
@@ -70,7 +53,6 @@ class ClientUI:
 
 class Client:
     def __init__(self, master):
-        # super(Client, self).__init__()
         self.master = master
         self.queue = Queue()
         self.ui = ClientUI(master, self.queue, self.send)
