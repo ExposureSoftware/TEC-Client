@@ -1,9 +1,7 @@
 __author__ = 'ToothlessRebel'
 __all__ = [
     'Client',
-    'ClientUI',
-    'Preferences'
+    'ClientUI'
 ]
 from client.client import Client
-from client.client import ClientUI
-from client.client import Preferences
+from client.clientui import ClientUI
