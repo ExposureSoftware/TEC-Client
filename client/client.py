@@ -37,7 +37,6 @@ class Client:
         socket.connect(self.socket, ("tec.skotos.net", 6730))
         self.send("/\/Connect: na/a!!n/a")
         while self.connect:
-            pprint("Socket looped.")
             sleep(0)
             buffer = str(self.socket.recv(4096), encoding='utf8').split("\r\n")
             for line in buffer:
