@@ -27,8 +27,12 @@ class Client:
 
     def listen(self):
         socket.connect(self.socket, ("tec.skotos.net", 6730))
-        while True:
+        self.send("/\/Connect: na/a!!n/a")
+        while self.connect:
             sleep(0)
             buffer = str(self.socket.recv(4096), encoding='utf8').split("\r\n")
             for line in buffer:
-                self.ui.draw_output(line)
+                if line.find('/\/') == -1:
+                    self.ui.draw_output(line)
+                else:
+                    pprint("Unparsed command: " + line)
