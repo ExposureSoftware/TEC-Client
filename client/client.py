@@ -41,7 +41,7 @@ class Client:
             buffer = str(self.socket.recv(4096), encoding='utf8').split("\r\n")
             for line in buffer:
                 if line.find('/\/') == -1:
-                    self.ui.draw_output(line)
+                    self.ui.parse_output(line)
                 else:
                     pprint("Unparsed command: " + line)
         pprint("Socket closing.")
