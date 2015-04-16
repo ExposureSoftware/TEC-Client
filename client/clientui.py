@@ -4,7 +4,7 @@ from preferences.preferences import Preferences
 import tkinter as tk
 import re
 
-from pprint import pprint
+# from pprint import pprint
 
 
 class ClientUI(tk.Frame):
@@ -42,7 +42,6 @@ class ClientUI(tk.Frame):
                     hex_value = hex(int(value[0:-1]))[2:]
                     number += "00" if hex_value == "0" else hex_value
                 # Now that we have a string representing a hexadecimal, sheesh
-                pprint(number)
                 # Let's make a tag for the color!
                 # Reusing the tag sets the color for ALL tags of that name!
                 self.output_panel.tag_configure(number, foreground=number, font=self.output_panel.cget("font"))
