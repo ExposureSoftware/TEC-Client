@@ -2,10 +2,9 @@
 A client for the Skotos prose RPG The Eternal City
 
 ## Build Status
-### Master
+Develop: [![Build Status](https://travis-ci.org/ExposureSoftware/TEC-Client.svg?branch=dev)](https://travis-ci.org/ExposureSoftware/TEC-Client)
 
-### Develop
-[![Build Status](https://travis-ci.org/ExposureSoftware/TEC-Client.svg?branch=dev)](https://travis-ci.org/ExposureSoftware/TEC-Client)
+Master:  [![Build Status](https://travis-ci.org/ExposureSoftware/TEC-Client.svg?branch=master)](https://travis-ci.org/ExposureSoftware/TEC-Client)
 
 ## Installation
 1. Install [Python 3](https://www.python.org/ftp/python/3.4.3/python-3.4.3.msi).
