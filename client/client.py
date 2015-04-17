@@ -6,16 +6,21 @@ from time import sleep
 from threading import Thread
 from .clientui import ClientUI
 from configparser import ConfigParser
+import logging
 
 from pprint import pprint
 
 
 class Client:
     def __init__(self, master):
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.DEBUG)
+        pprint(self.log.getEffectiveLevel())
+        self.log.warning('Starting logger.')
         self.master = master
         self.queue = Queue()
-        self.config = ConfigParser()
         self.connect = True
+        self.config = ConfigParser()
         if self.config.read('config.ini').__len__() < 1:
             raise EnvironmentError
         self.ui = ClientUI(master, self, self.queue, self.send)

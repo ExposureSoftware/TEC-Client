@@ -83,5 +83,5 @@ class ClientUI(tk.Frame):
         self.scroll_output()
 
     def show_preferences(self):
-        prefs = Preferences(self.master)
+        prefs = Preferences(self.client)
         prefs.grid()
