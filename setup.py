@@ -17,7 +17,7 @@ base = None
 
 setup(
     name="TEC Client",
-    version="0.3-alpha",
+    version="0.4-alpha",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options
