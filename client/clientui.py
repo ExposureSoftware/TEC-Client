@@ -57,6 +57,10 @@ class ClientUI(tk.Frame):
         self.output_panel.configure(state="disabled")
         self.scroll_output()
 
+        # If we're logging the session, we need to handle that
+        if self.client.config['logging'].getboolean('log_session'):
+            self.client.log_session(text)
+
     def scroll_output(self):
         self.output_panel.see(tk.END)
 

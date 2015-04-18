@@ -7,6 +7,7 @@ from threading import Thread
 from .clientui import ClientUI
 from configparser import ConfigParser
 import logging
+import time
 
 from pprint import pprint
 
@@ -27,6 +28,7 @@ class Client:
         self.socket = socket()
         self.listener = Thread(target=self.listen)
         self.listener.start()
+        self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")
 
         self.master.protocol("WM_DELETE_WINDOW", self.stop)
 
@@ -37,6 +39,12 @@ class Client:
             if successful == 0:
                 raise RuntimeError("Unable to send message.")
             total_successful = total_successful + successful
+
+    def log_session(self, text):
+        log_dir = self.config['logging']['log_directory']
+        log_filename = log_dir + self.session_log_name
+        with open(log_filename, 'a+') as game_log:
+            game_log.write(text)
 
     def listen(self):
         socket.connect(self.socket, ("tec.skotos.net", 6730))

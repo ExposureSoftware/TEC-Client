@@ -19,9 +19,11 @@ class Preferences(Frame):
 
         # Setup the variables used
         self.echo_input = BooleanVar()
-        self.logging = BooleanVar()
         self.echo_input.set(self.client.config['UI'].getboolean('echo_input'))
         self.echo_input.trace("w", self.echo_handler)
+        self.logging = BooleanVar()
+        self.logging.set(self.client.config['logging'].getboolean('log_session'))
+        self.logging.trace('w', self.logging_handler)
         self.log_dir = self.client.config['logging']['log_directory']
 
         # Build the actual window and widgets
@@ -50,7 +52,7 @@ class Preferences(Frame):
         self.client.config['UI']['echo_input'] = 'yes' if self.echo_input.get() else 'no'
 
     def logging_handler(self, arg1, arg2, mode):
-        self.client.config['logging']['log_directory'] = 'yes' if self.logging.get else 'no'
+        self.client.config['logging']['log_session'] = 'yes' if self.logging.get else 'no'
         self.write_config()
 
     def write_config(self, file='config.ini'):
