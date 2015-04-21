@@ -26,19 +26,41 @@ class Client:
             raise EnvironmentError
         self.ui = ClientUI(master, self, self.queue, self.send)
         self.socket = socket()
+        self.listener = None
+        self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")
+        self.startup()
+        self.master.protocol("WM_DELETE_WINDOW", self.quit)
+
+    def send(self, command):
+        if self.connect:
+            total_successful = 0
+            while total_successful < command.__len__():
+                successful = self.socket.send(bytes(command[total_successful:] + "\r\n", "UTF-8"))
+                if successful == 0:
+                    raise RuntimeError("Unable to send message.")
+                total_successful = total_successful + successful
+        else:
+            self.ui.parse_output('No connection -- please reconnect to send commands.')
+
+    def startup(self):
+        pprint("Starting connection!")
+        self.connect = True
+        self.socket = socket()
+        self.ui.menu_file.entryconfigure(1, label="Disconnect", command=self.shutdown)
         self.listener = Thread(target=self.listen)
         self.listener.start()
         self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")
 
-        self.master.protocol("WM_DELETE_WINDOW", self.stop)
+    def shutdown(self, completely=False):
+        self.connect = False
+        socket.close(self.socket)
+        if not completely:
+            self.ui.menu_file.entryconfigure(1, label="Reconnect", command=self.startup)
+            self.ui.parse_output('Connection closed.')
 
-    def send(self, command):
-        total_successful = 0
-        while total_successful < command.__len__():
-            successful = self.socket.send(bytes(command[total_successful:] + "\r\n", "UTF-8"))
-            if successful == 0:
-                raise RuntimeError("Unable to send message.")
-            total_successful = total_successful + successful
+    def quit(self):
+        self.shutdown(True)
+        self.master.destroy()
 
     def log_session(self, text):
         log_dir = self.config['logging']['log_directory']
@@ -50,19 +72,22 @@ class Client:
         socket.connect(self.socket, ("tec.skotos.net", 6730))
         self.send("/\/Connect: na/a!!n/a")
         while self.connect:
+            buffer = ""
             sleep(0)
-            buffer = str(self.socket.recv(4096), encoding='utf8').split("\r\n")
-            for line in buffer:
-                if line.find('/\/') == -1:
-                    self.ui.parse_output(line)
-                else:
-                    pprint("Unparsed command: " + line)
-        pprint("Socket closing.")
-        socket.close(self.socket)
-
-    def stop(self):
-        # self.master.destroy()
-        pprint("Stopping connection.")
-        self.connect = False
-        pprint(self.listener.join())
-        # self.master.destroy()
+            try:
+                buffer = str(self.socket.recv(4096), encoding='utf8')
+            except Exception as exc:
+                pprint(exc.args)
+                pprint("SOMETHING BAD HAPPENED")
+            buffer = buffer.splitlines()
+            if not buffer.__len__() == 0:
+                for number, line in enumerate(buffer):
+                    if line.find('/\/') == -1:
+                        self.ui.parse_output(line)
+                    else:
+                        pprint("Unparsed command: " + line)
+            else:
+                pprint(buffer)
+                break
+        if self.connect:
+            self.shutdown()

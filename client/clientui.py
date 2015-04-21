@@ -4,7 +4,7 @@ from preferences.preferences import Preferences
 import tkinter as tk
 import re
 
-# from pprint import pprint
+from pprint import pprint
 
 
 class ClientUI(tk.Frame):
@@ -16,10 +16,11 @@ class ClientUI(tk.Frame):
         self.master = master
 
         menu_bar = tk.Menu(master)
-        menu_file = tk.Menu(menu_bar, tearoff=0)
-        menu_file.add_command(label="Preferences", command=self.show_preferences)
-        menu_file.add_command(label="Quit", command=master.destroy)
-        menu_bar.add_cascade(label="Client", menu=menu_file)
+        self.menu_file = tk.Menu(menu_bar, tearoff=0)
+        self.menu_file.add_command(label="Preferences", command=self.show_preferences)
+        self.menu_file.add_command(label="Disconnect", command=self.client.shutdown)
+        self.menu_file.add_command(label="Quit", command=self.client.quit)
+        menu_bar.add_cascade(label="Client", menu=self.menu_file)
         self.master.config(menu=menu_bar)
 
         self.master.grid()
@@ -34,6 +35,7 @@ class ClientUI(tk.Frame):
         pattern = re.compile(r'(\x1bci=\d{1,3},\d{1,3},\d{1,3}\x1b)')
         segments = pattern.split(line)
         tag = None
+        self.draw_output("\n")
         for segment in segments:
             if re.match(r'\x1b', segment) is not None:
                 pattern = re.compile(r"\d{1,3}.")
@@ -48,7 +50,6 @@ class ClientUI(tk.Frame):
                 tag = number
             else:
                 self.draw_output(segment, tag)
-        self.draw_output("\n")
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -84,7 +85,7 @@ class ClientUI(tk.Frame):
         self.send_command(text)
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output((text + "\n"), 'italic')
-        self.scroll_output()
+            self.scroll_output()
 
     def show_preferences(self):
         prefs = Preferences(self.client)
