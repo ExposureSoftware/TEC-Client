@@ -49,7 +49,9 @@ class Preferences(Frame):
         self.write_config()
 
     def echo_handler(self, arg1, arg2, mode):
+        pprint(self.echo_input.get())
         self.client.config['UI']['echo_input'] = 'yes' if self.echo_input.get() else 'no'
+        self.write_config()
 
     def logging_handler(self, arg1, arg2, mode):
         self.client.config['logging']['log_session'] = 'yes' if self.logging.get else 'no'
