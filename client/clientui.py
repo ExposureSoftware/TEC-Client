@@ -70,7 +70,7 @@ class ClientUI(tk.Frame):
         scrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
 
         output = tk.Text(self.master, state=tk.DISABLED, name="output", yscrollcommand=scrollbar.set)
-        scrollbar.config(command=output.yview())
+        scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
         output.grid(row=0)
 
