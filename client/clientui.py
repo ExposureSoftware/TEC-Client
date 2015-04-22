@@ -1,7 +1,7 @@
 __author__ = 'ToothlessRebel'
 from tkinter.font import Font
 from preferences.preferences import Preferences
-import tkinter as tk
+import tkinter as tk  # @todo Import only what's needed.
 import re
 
 from pprint import pprint
@@ -24,6 +24,8 @@ class ClientUI(tk.Frame):
         self.master.config(menu=menu_bar)
 
         self.master.grid()
+        tk.Grid.rowconfigure(self.master, 0, weight=1)
+        tk.Grid.columnconfigure(self.master, 0, weight=1)
         self.create_widgets()
 
         self.output_panel = master.children['output']
@@ -72,7 +74,7 @@ class ClientUI(tk.Frame):
         output = tk.Text(self.master, state=tk.DISABLED, name="output", yscrollcommand=scrollbar.set)
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
-        output.grid(row=0)
+        output.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
 
         input_area = tk.Entry(self.master, name="input")
         input_area.bind("<Return>", self.parse_input)
