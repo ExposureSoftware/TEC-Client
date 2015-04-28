@@ -110,10 +110,10 @@ class Client:
     def login_user(self):
         self.ui.interrupt_input = True
         self.ui.draw_output('Please enter your user name:\n')
-        while self.ui.input_buffer.__len__() < 1:
+        while self.ui.interrupt_buffer.__len__() < 1:
             sleep(0.5)
         self.ui.draw_output('Please enter your password:\n')
-        while self.ui.input_buffer.__len__() < 2:
+        while self.ui.interrupt_buffer.__len__() < 2:
             sleep(0.5)
         self.ui.draw_output('Signing in...\n')
 
@@ -124,8 +124,8 @@ class Client:
             'Cookie': 'biscuit=test'
         }
         data = {
-            'uname': self.ui.input_buffer.popleft(),
-            'pwd': self.ui.input_buffer.popleft(),
+            'uname': self.ui.interrupt_buffer.popleft(),
+            'pwd': self.ui.interrupt_buffer.popleft(),
             'phrase': '',
             'submit': 'true'
         }
