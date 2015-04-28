@@ -8,6 +8,9 @@ from .clientui import ClientUI
 from configparser import ConfigParser
 import logging
 import time
+import requests
+import re
+import hashlib
 
 from pprint import pprint
 
@@ -30,6 +33,8 @@ class Client:
         self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")
         self.startup()
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
+        self.uname = ''
+        self.pwd = ''
 
     def send(self, command):
         if self.connect:
@@ -40,7 +45,7 @@ class Client:
                     raise RuntimeError("Unable to send message.")
                 total_successful = total_successful + successful
         else:
-            self.ui.parse_output('No connection -- please reconnect to send commands.')
+            self.ui.parse_output("No connection -- please reconnect to send commands.\n")
 
     def startup(self):
         pprint("Starting connection!")
@@ -70,7 +75,8 @@ class Client:
 
     def listen(self):
         socket.connect(self.socket, ("tec.skotos.net", 6730))
-        self.send("/\/Connect: na/a!!n/a")
+        self.login_user()
+        self.send("SKOTOS Zealous 0.7.12.2\n")
         while self.connect:
             buffer = ""
             sleep(0)
@@ -82,12 +88,50 @@ class Client:
             buffer = buffer.splitlines()
             if not buffer.__len__() == 0:
                 for number, line in enumerate(buffer):
-                    if line.find('/\/') == -1:
+                    if line.find('SECRET') == -1:
                         self.ui.parse_output(line)
                     else:
-                        pprint("Unparsed command: " + line)
+                        if line.find('SECRET') == 0:
+                            secret = line[7:].strip()
+                            pprint(self.uname + self.pwd + secret)
+                            hash_string = self.uname + self.pwd + secret
+                            zealous_hash = hashlib.md5(hash_string.encode('utf-8')).hexdigest()
+                            pprint(zealous_hash)
+                            self.send("USER " + self.uname)
+                            self.send("SECRET " + secret)
+                            self.send("HASH " + zealous_hash)
+                            self.send("CHAR ")
             else:
                 pprint(buffer)
                 break
         if self.connect:
             self.shutdown()
+
+    def login_user(self):
+        self.ui.interrupt_input = True
+        self.ui.draw_output('Please enter your user name:\n')
+        while self.ui.interrupt_buffer.__len__() < 1:
+            sleep(0.5)
+        self.ui.draw_output('Please enter your password:\n')
+        while self.ui.interrupt_buffer.__len__() < 2:
+            sleep(0.5)
+        self.ui.draw_output('Signing in...\n')
+
+        # Attempt to Zealotry log in.
+        header = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/42.0.2311.90 Safari/537.36',
+            'Cookie': 'biscuit=test'
+        }
+        data = {
+            'uname': self.ui.interrupt_buffer.popleft(),
+            'pwd': self.ui.interrupt_buffer.popleft(),
+            'phrase': '',
+            'submit': 'true'
+        }
+        url = 'https://www.skotos.net/user/login.php'
+        response = requests.post(url, headers=header, data=data, allow_redirects=False)
+        pprint(response.headers)
+        self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
+        self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)
+        self.ui.interrupt_input = False

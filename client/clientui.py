@@ -1,8 +1,10 @@
 __author__ = 'ToothlessRebel'
 from tkinter.font import Font
 from preferences.preferences import Preferences
-import tkinter as tk
+import tkinter as tk  # @todo Import only what's needed.
 import re
+from collections import deque
+import html.parser
 
 from pprint import pprint
 
@@ -14,6 +16,10 @@ class ClientUI(tk.Frame):
         self.queue = queue
         self.send_command = send_command
         self.master = master
+        self.interrupt_input = False
+        self.interrupt_buffer = deque()
+        self.input_buffer = []
+        self.input_cursor = 0
 
         menu_bar = tk.Menu(master)
         self.menu_file = tk.Menu(menu_bar, tearoff=0)
@@ -24,32 +30,41 @@ class ClientUI(tk.Frame):
         self.master.config(menu=menu_bar)
 
         self.master.grid()
+        tk.Grid.rowconfigure(self.master, 0, weight=1)
+        tk.Grid.columnconfigure(self.master, 0, weight=1)
         self.create_widgets()
 
+        # pprint(vars(master))
+        self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output']
+        self.input = master.children['input']
         italic_font = Font(self.output_panel, self.output_panel.cget("font"))
         italic_font.configure(slant='italic')
         self.output_panel.tag_configure("italic", font=italic_font)
 
     def parse_output(self, line):
-        pattern = re.compile(r'(\x1bci=\d{1,3},\d{1,3},\d{1,3}\x1b)')
-        segments = pattern.split(line)
-        tag = None
-        self.draw_output("\n")
-        for segment in segments:
-            if re.match(r'\x1b', segment) is not None:
-                pattern = re.compile(r"\d{1,3}.")
-                number = "#"
-                for value in pattern.findall(segment):
-                    hex_value = hex(int(value[0:-1]))[2:]
-                    number += "00" if hex_value == "0" else hex_value
-                # Now that we have a string representing a hexadecimal, sheesh
-                # Let's make a tag for the color!
-                # Reusing the tag sets the color for ALL tags of that name!
-                self.output_panel.tag_configure(number, foreground=number, font=self.output_panel.cget("font"))
-                tag = number
-            else:
-                self.draw_output(segment, tag)
+        # Capture SKOOTs
+        if line.find('SKOOT') != -1:
+            self.parse_skoot(line)
+        else:
+            parser = html.parser.HTMLParser()
+            line = parser.unescape(line)
+            line = re.sub(r"</.*?>", "", line)
+            pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
+            segments = pattern.split(line)
+            tag = None
+            self.draw_output("\n")
+            for segment in segments:
+                if segment.find('#') == 0:
+                    self.output_panel.tag_configure(segment, foreground=segment, font=self.output_panel.cget("font"))
+                    tag = segment
+                else:
+                    # Remove when not playing and coding at same time ;)
+                    pprint(segment)
+                    self.draw_output(segment, tag)
+
+    def parse_skoot(self, skoot):
+        pprint(skoot)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -69,20 +84,65 @@ class ClientUI(tk.Frame):
         scrollbar = tk.Scrollbar(self.master)
         scrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
 
-        output = tk.Text(self.master, state=tk.DISABLED, name="output", yscrollcommand=scrollbar.set)
+        output = tk.Text(
+            self.master,
+            state=tk.DISABLED,
+            name="output",
+            yscrollcommand=scrollbar.set,
+            wrap=tk.WORD
+        )
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
-        output.grid(row=0)
+        output.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
 
         input_area = tk.Entry(self.master, name="input")
         input_area.bind("<Return>", self.parse_input)
+        input_area.bind("<Up>", self.traverse_up_input_buffer)
+        input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
-        input_area.grid(row=1, sticky=tk.W+tk.E)
+        input_area.grid(row=1, sticky=tk.W+tk.E, columnspan=2)
+
+        # This is the side bar configuration.
+        side_bar = tk.Frame(name="side_bar")
+        side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S+tk.N)
+
+        # The four status bars
+        status_area = tk.Canvas(
+            side_bar,
+            name="status_area",
+            width=65,
+            height=75,
+            bg='black')
+        status_area.create_rectangle(5, 5, 15, 75, fill="red", outline="red")
+        status_area.create_rectangle(20, 5, 30, 75, fill="yellow", outline="yellow")
+        status_area.create_rectangle(35, 5, 45, 75, fill="blue", outline="blue")
+        status_area.create_rectangle(50, 5, 60, 75, fill="green", outline="green")
+        status_area.pack(side='bottom')
+
+    def traverse_up_input_buffer(self, event):
+        if self.input_cursor < self.input_buffer.__len__():
+            self.input_cursor += 1
+            self.set_input()
+
+    def traverse_down_input_buffer(self, event):
+        if self.input_cursor > 0:
+            self.input_cursor -= 1
+            self.set_input()
+        else:
+            self.input.delete(0, tk.END)
+
+    def set_input(self):
+        self.input.delete(0, tk.END)
+        self.input.insert(0, self.input_buffer[-self.input_cursor])
 
     def parse_input(self, user_input):
         text = user_input.widget.get()
+        self.input_buffer.append(user_input.widget.get())
         user_input.widget.delete(0, tk.END)
-        self.send_command(text)
+        if not self.interrupt_input:
+            self.send_command(text)
+        else:
+            self.interrupt_buffer.append(text)
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output((text + "\n"), 'italic')
             self.scroll_output()
