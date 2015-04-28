@@ -44,6 +44,8 @@ class ClientUI(tk.Frame):
         if line.find('SKOOT') != -1:
             self.parse_skoot(line)
         else:
+            parser = html.parser.HTMLParser()
+            line = parser.unescape(line)
             line = re.sub(r"</.*?>", "", line)
             pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
             segments = pattern.split(line)
