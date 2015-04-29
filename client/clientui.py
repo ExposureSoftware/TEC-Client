@@ -5,6 +5,7 @@ import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
 import html.parser
+from math import floor
 
 from pprint import pprint
 
@@ -38,9 +39,16 @@ class ClientUI(tk.Frame):
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output']
         self.input = master.children['input']
+
+        self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
+        self.line_length = self.calc_line_length(self.output_panel.cget("width"))
         italic_font = Font(self.output_panel, self.output_panel.cget("font"))
         italic_font.configure(slant='italic')
         self.output_panel.tag_configure("italic", font=italic_font)
+        bold_font = Font(self.output_panel, self.output_panel.cget("font"))
+        bold_font.configure(weight='bold')
+        self.output_panel.tag_configure('bold', font=bold_font)
+        self.output_panel.tag_configure("center", justify=tk.CENTER)
 
     def parse_output(self, line):
         # Capture SKOOTs
@@ -50,18 +58,67 @@ class ClientUI(tk.Frame):
             parser = html.parser.HTMLParser()
             line = parser.unescape(line)
             line = re.sub(r"</.*?>", "", line)
-            pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
-            segments = pattern.split(line)
             tag = None
             self.draw_output("\n")
-            for segment in segments:
-                if segment.find('#') == 0:
-                    self.output_panel.tag_configure(segment, foreground=segment, font=self.output_panel.cget("font"))
-                    tag = segment
-                else:
-                    # Remove when not playing and coding at same time ;)
-                    pprint(segment)
-                    self.draw_output(segment, tag)
+
+            # line is now a string with HTML opening tags.
+            # Each tag should delineate segment of the string so that if removed the resulting string
+            # would be the output line.
+
+            # It can be a subset of (antiquated) HTML tags:
+            # center, font, hr, ul, li, pre, b
+            pattern = re.compile(r'<(.*?)>')
+            pprint(line)
+            segments = pattern.split(line)
+            pprint(segments)
+            if segments.__len__() > 1:
+                for segment in segments:
+                    segment = segment.strip('<>')
+                    # Not sure if more Pythonic to do this or a dictionary of functions
+                    if re.search(r'thinks aloud:', segment):
+                        # Just a thought, print it!
+                        self.draw_output('<' + segment + '>', tag)
+                    elif re.match(r'font', segment):
+                        # Handle font changes
+                        # So far I know of size and color attributes.
+                        color = re.match(r'font color="(#[0-9a-fA-F]{6})"', segment)
+                        if color:
+                            color = color.group(1)
+                            self.output_panel.tag_configure(color, foreground=color, font=self.output_panel.cget("font"))
+                            tag = color
+                        # @todo Handle sizes
+                    elif re.match(r'hr', segment):
+                        i = 0
+                        line = ''
+                        while i < self.line_length:
+                            line += '-'
+                            i += 1
+                        self.draw_output(line, 'center')
+                    elif re.match(r'pre', segment):
+                        # For now, we're just handling this as centered because our font is already fixed width.
+                        tag = 'center'
+                    elif re.match(r'center', segment):
+                        tag = 'center'
+                    elif re.match(r'b', segment):
+                        tag = 'bold'
+                    else:
+                        # Not a special segment
+                        self.draw_output(segment, tag)
+            else:
+                self.draw_output(line, tag)
+
+            # pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
+            # segments = pattern.split(line)
+            # tag = None
+            # self.draw_output("\n")
+            # for segment in segments:
+            #     if segment.find('#') == 0:
+            #         self.output_panel.tag_configure(segment, foreground=segment, font=self.output_panel.cget("font"))
+            #         tag = segment
+            #     else:
+            #         # Remove when not playing and coding at same time ;)
+            #         pprint(segment)
+            #         self.draw_output(segment, tag)
 
     def parse_skoot(self, skoot):
         pprint(skoot)
@@ -80,6 +137,13 @@ class ClientUI(tk.Frame):
     def scroll_output(self):
         self.output_panel.see(tk.END)
 
+    def set_line_length(self, event):
+        width = event.width
+        self.line_length = self.calc_line_length(width)
+
+    def calc_line_length(self, width):
+        return floor((width / self.char_width) - 10)
+
     def create_widgets(self):
         scrollbar = tk.Scrollbar(self.master)
         scrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
@@ -94,6 +158,7 @@ class ClientUI(tk.Frame):
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
         output.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
+        output.bind("<Configure>", self.set_line_length)
 
         input_area = tk.Entry(self.master, name="input")
         input_area.bind("<Return>", self.parse_input)
