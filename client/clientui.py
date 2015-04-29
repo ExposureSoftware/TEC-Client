@@ -58,7 +58,7 @@ class ClientUI(tk.Frame):
             parser = html.parser.HTMLParser()
             line = parser.unescape(line)
             line = re.sub(r"</.*?>", "", line)
-            tag = None
+            tags = []
             self.draw_output("\n")
 
             # line is now a string with HTML opening tags.
@@ -77,7 +77,8 @@ class ClientUI(tk.Frame):
                     # Not sure if more Pythonic to do this or a dictionary of functions
                     if re.search(r'thinks aloud:', segment):
                         # Just a thought, print it!
-                        self.draw_output('<' + segment + '>', tag)
+                        pprint(tuple(tags))
+                        self.draw_output('<' + segment + '>', tuple(tags))
                     elif re.match(r'font', segment):
                         # Handle font changes
                         # So far I know of size and color attributes.
@@ -85,7 +86,7 @@ class ClientUI(tk.Frame):
                         if color:
                             color = color.group(1)
                             self.output_panel.tag_configure(color, foreground=color, font=self.output_panel.cget("font"))
-                            tag = color
+                            tags.append(color)
                         # @todo Handle sizes
                     elif re.match(r'hr', segment):
                         i = 0
@@ -96,29 +97,17 @@ class ClientUI(tk.Frame):
                         self.draw_output(line, 'center')
                     elif re.match(r'pre', segment):
                         # For now, we're just handling this as centered because our font is already fixed width.
-                        tag = 'center'
+                        tags.append('center')
                     elif re.match(r'center', segment):
-                        tag = 'center'
+                        tags.append('center')
                     elif re.match(r'b', segment):
-                        tag = 'bold'
+                        tags.append('bold')
                     else:
                         # Not a special segment
-                        self.draw_output(segment, tag)
+                        pprint(tuple(tags))
+                        self.draw_output(segment, tuple(tags))
             else:
-                self.draw_output(line, tag)
-
-            # pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
-            # segments = pattern.split(line)
-            # tag = None
-            # self.draw_output("\n")
-            # for segment in segments:
-            #     if segment.find('#') == 0:
-            #         self.output_panel.tag_configure(segment, foreground=segment, font=self.output_panel.cget("font"))
-            #         tag = segment
-            #     else:
-            #         # Remove when not playing and coding at same time ;)
-            #         pprint(segment)
-            #         self.draw_output(segment, tag)
+                self.draw_output(line, None)
 
     def parse_skoot(self, skoot):
         pprint(skoot)
