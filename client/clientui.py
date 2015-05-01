@@ -198,7 +198,7 @@ class ClientUI(tk.Frame):
         else:
             self.interrupt_buffer.append(text)
         if self.client.config['UI'].getboolean('echo_input'):
-            self.draw_output((text + "\n"), 'italic')
+            self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
 
     def show_preferences(self):

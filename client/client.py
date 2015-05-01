@@ -109,13 +109,13 @@ class Client:
 
     def login_user(self):
         self.ui.interrupt_input = True
-        self.ui.draw_output('Please enter your user name:\n')
+        self.ui.draw_output('\nPlease enter your user name:')
         while self.ui.interrupt_buffer.__len__() < 1:
             sleep(0.5)
-        self.ui.draw_output('Please enter your password:\n')
+        self.ui.draw_output('\nPlease enter your password:')
         while self.ui.interrupt_buffer.__len__() < 2:
             sleep(0.5)
-        self.ui.draw_output('Signing in...\n')
+        self.ui.draw_output('\nSigning in...')
 
         # Attempt to Zealotry log in.
         header = {
