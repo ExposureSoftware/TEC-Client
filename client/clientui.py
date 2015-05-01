@@ -21,6 +21,7 @@ class ClientUI(tk.Frame):
         self.interrupt_buffer = deque()
         self.input_buffer = []
         self.input_cursor = 0
+        self.list_depth = 0
 
         menu_bar = tk.Menu(master)
         self.menu_file = tk.Menu(menu_bar, tearoff=0)
@@ -57,6 +58,10 @@ class ClientUI(tk.Frame):
         else:
             parser = html.parser.HTMLParser()
             line = parser.unescape(line)
+            # Before we nuke the HTML closing tags, decide if we need to un-nest some lists.
+            if self.list_depth > 0:
+                self.list_depth -= line.count('</ul>')
+                # pprint('List depth now lowered to: ' + str(self.list_depth))
             line = re.sub(r"</.*?>", "", line)
             tags = []
             self.draw_output("\n")
@@ -68,16 +73,13 @@ class ClientUI(tk.Frame):
             # It can be a subset of (antiquated) HTML tags:
             # center, font, hr, ul, li, pre, b
             pattern = re.compile(r'<(.*?)>')
-            pprint(line)
             segments = pattern.split(line)
-            pprint(segments)
             if segments.__len__() > 1:
                 for segment in segments:
                     segment = segment.strip('<>')
                     # Not sure if more Pythonic to do this or a dictionary of functions
                     if re.search(r'thinks aloud:', segment):
                         # Just a thought, print it!
-                        pprint(tuple(tags))
                         self.draw_output('<' + segment + '>', tuple(tags))
                     elif re.match(r'font', segment):
                         # Handle font changes
@@ -102,12 +104,27 @@ class ClientUI(tk.Frame):
                         tags.append('center')
                     elif re.match(r'b', segment):
                         tags.append('bold')
+                    elif re.match(r'ul', segment):
+                        self.list_depth += 1
+                        # pprint('List depth now raised to: ' + str(self.list_depth))
+                        segment.replace('ul', '')
+                        if re.match(r'li', segment):
+                            segment = segment.replace('li', self.draw_tabs() + "* ")
+                            self.draw_output(segment, tuple(tags))
+                    elif re.match(r'li', segment):
+                        segment = segment.replace('li', self.draw_tabs() + "* ")
+                        self.draw_output(segment, tuple(tags))
                     else:
                         # Not a special segment
-                        pprint(tuple(tags))
                         self.draw_output(segment, tuple(tags))
             else:
                 self.draw_output(line, None)
+
+    def draw_tabs(self):
+        tabs = ""
+        for tab in range(1, self.list_depth):
+            tabs += "    "
+        return tabs
 
     def parse_skoot(self, skoot):
         pprint(skoot)

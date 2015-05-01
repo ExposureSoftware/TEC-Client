@@ -48,7 +48,6 @@ class Client:
             self.ui.parse_output("No connection -- please reconnect to send commands.\n")
 
     def startup(self):
-        pprint("Starting connection!")
         self.connect = True
         self.socket = socket()
         self.ui.menu_file.entryconfigure(1, label="Disconnect", command=self.shutdown)
@@ -74,6 +73,7 @@ class Client:
             game_log.write(text)
 
     def listen(self):
+        pprint("Starting connection!")
         socket.connect(self.socket, ("tec.skotos.net", 6730))
         self.login_user()
         self.send("SKOTOS Zealous 0.7.12.2\n")
@@ -131,7 +131,7 @@ class Client:
         }
         url = 'https://www.skotos.net/user/login.php'
         response = requests.post(url, headers=header, data=data, allow_redirects=False)
-        pprint(response.headers)
+        # pprint(response.headers)
         self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
         self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)
         self.ui.interrupt_input = False
