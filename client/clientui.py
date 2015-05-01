@@ -5,6 +5,7 @@ import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
 import html.parser
+from math import floor
 
 from pprint import pprint
 
@@ -20,6 +21,7 @@ class ClientUI(tk.Frame):
         self.interrupt_buffer = deque()
         self.input_buffer = []
         self.input_cursor = 0
+        self.list_depth = 0
 
         menu_bar = tk.Menu(master)
         self.menu_file = tk.Menu(menu_bar, tearoff=0)
@@ -38,9 +40,16 @@ class ClientUI(tk.Frame):
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output']
         self.input = master.children['input']
+
+        self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
+        self.line_length = self.calc_line_length(self.output_panel.cget("width"))
         italic_font = Font(self.output_panel, self.output_panel.cget("font"))
         italic_font.configure(slant='italic')
         self.output_panel.tag_configure("italic", font=italic_font)
+        bold_font = Font(self.output_panel, self.output_panel.cget("font"))
+        bold_font.configure(weight='bold')
+        self.output_panel.tag_configure('bold', font=bold_font)
+        self.output_panel.tag_configure("center", justify=tk.CENTER)
 
     def parse_output(self, line):
         # Capture SKOOTs
@@ -49,19 +58,73 @@ class ClientUI(tk.Frame):
         else:
             parser = html.parser.HTMLParser()
             line = parser.unescape(line)
+            # Before we nuke the HTML closing tags, decide if we need to un-nest some lists.
+            if self.list_depth > 0:
+                self.list_depth -= line.count('</ul>')
+                # pprint('List depth now lowered to: ' + str(self.list_depth))
             line = re.sub(r"</.*?>", "", line)
-            pattern = re.compile(r'<font color="(#[0-9a-fA-F]{6})">')
-            segments = pattern.split(line)
-            tag = None
+            tags = []
             self.draw_output("\n")
-            for segment in segments:
-                if segment.find('#') == 0:
-                    self.output_panel.tag_configure(segment, foreground=segment, font=self.output_panel.cget("font"))
-                    tag = segment
-                else:
-                    # Remove when not playing and coding at same time ;)
-                    pprint(segment)
-                    self.draw_output(segment, tag)
+
+            # line is now a string with HTML opening tags.
+            # Each tag should delineate segment of the string so that if removed the resulting string
+            # would be the output line.
+
+            # It can be a subset of (antiquated) HTML tags:
+            # center, font, hr, ul, li, pre, b
+            pattern = re.compile(r'<(.*?)>')
+            segments = pattern.split(line)
+            if segments.__len__() > 1:
+                for segment in segments:
+                    segment = segment.strip('<>')
+                    # Not sure if more Pythonic to do this or a dictionary of functions
+                    if re.search(r'thinks aloud:', segment):
+                        # Just a thought, print it!
+                        self.draw_output('<' + segment + '>', tuple(tags))
+                    elif re.match(r'font', segment):
+                        # Handle font changes
+                        # So far I know of size and color attributes.
+                        color = re.match(r'font color="(#[0-9a-fA-F]{6})"', segment)
+                        if color:
+                            color = color.group(1)
+                            self.output_panel.tag_configure(color, foreground=color, font=self.output_panel.cget("font"))
+                            tags.append(color)
+                        # @todo Handle sizes
+                    elif re.match(r'hr', segment):
+                        i = 0
+                        line = ''
+                        while i < self.line_length:
+                            line += '-'
+                            i += 1
+                        self.draw_output(line, 'center')
+                    elif re.match(r'pre', segment):
+                        # For now, we're just handling this as centered because our font is already fixed width.
+                        tags.append('center')
+                    elif re.match(r'center', segment):
+                        tags.append('center')
+                    elif re.match(r'b', segment):
+                        tags.append('bold')
+                    elif re.match(r'ul', segment):
+                        self.list_depth += 1
+                        # pprint('List depth now raised to: ' + str(self.list_depth))
+                        segment.replace('ul', '')
+                        if re.match(r'li', segment):
+                            segment = segment.replace('li', self.draw_tabs() + "* ")
+                            self.draw_output(segment, tuple(tags))
+                    elif re.match(r'li', segment):
+                        segment = segment.replace('li', self.draw_tabs() + "* ")
+                        self.draw_output(segment, tuple(tags))
+                    else:
+                        # Not a special segment
+                        self.draw_output(segment, tuple(tags))
+            else:
+                self.draw_output(line, None)
+
+    def draw_tabs(self):
+        tabs = ""
+        for tab in range(1, self.list_depth):
+            tabs += "    "
+        return tabs
 
     def parse_skoot(self, skoot):
         pprint(skoot)
@@ -80,6 +143,13 @@ class ClientUI(tk.Frame):
     def scroll_output(self):
         self.output_panel.see(tk.END)
 
+    def set_line_length(self, event):
+        width = event.width
+        self.line_length = self.calc_line_length(width)
+
+    def calc_line_length(self, width):
+        return floor((width / self.char_width) - 10)
+
     def create_widgets(self):
         scrollbar = tk.Scrollbar(self.master)
         scrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
@@ -94,6 +164,7 @@ class ClientUI(tk.Frame):
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
         output.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
+        output.bind("<Configure>", self.set_line_length)
 
         input_area = tk.Entry(self.master, name="input")
         input_area.bind("<Return>", self.parse_input)
@@ -144,7 +215,7 @@ class ClientUI(tk.Frame):
         else:
             self.interrupt_buffer.append(text)
         if self.client.config['UI'].getboolean('echo_input'):
-            self.draw_output((text + "\n"), 'italic')
+            self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
 
     def show_preferences(self):
