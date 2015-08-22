@@ -34,6 +34,7 @@ class ClientUI(tk.Frame):
         self.master.grid()
         tk.Grid.rowconfigure(self.master, 0, weight=1)
         tk.Grid.columnconfigure(self.master, 0, weight=1)
+        self.status = dict()
         self.create_widgets()
 
         # pprint(vars(master))
@@ -196,7 +197,6 @@ class ClientUI(tk.Frame):
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
 
-        self.status = dict()
         # The four status bars
         self.status_area = tk.Canvas(
             side_bar,
@@ -209,10 +209,18 @@ class ClientUI(tk.Frame):
         self.status_area.create_rectangle(20, 5, 30, 105, fill="#3d3f04", outline="#3d3f04")
         self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="#e2e201", outline="#e2e201")
         self.status_area.create_rectangle(35, 5, 45, 105, fill="#023f3f", outline="#023f3f")
-        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2", outline="#00e2e2")
+        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2",
+                                                                       outline="#00e2e2")
         self.status_area.create_rectangle(50, 5, 60, 105, fill="#044006", outline="#044006")
         self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="#00e201", outline="#00e201")
         self.status_area.pack(side='bottom')
+
+        self.compass = tk.Canvas(side_bar,
+                                 name="compass",
+                                 width=65,
+                                 height=65,
+                                 bg='black')
+        self.compass.create_rectangle()
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
