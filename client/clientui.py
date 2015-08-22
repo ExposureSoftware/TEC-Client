@@ -1,13 +1,13 @@
 __author__ = 'ToothlessRebel'
 from tkinter.font import Font
-from preferences.preferences import Preferences
 import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
 import html.parser
 from math import floor
-
 from pprint import pprint
+
+from preferences.preferences import Preferences
 
 
 class ClientUI(tk.Frame):
@@ -130,13 +130,13 @@ class ClientUI(tk.Frame):
     def update_status(self, status_update):
         if status_update and status_update[0]:
             if status_update[0] == 'Health':
-                self.status_area.coords(self.status['health'], 5, 5, 15, 5 + int(status_update[1]))
+                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
             elif status_update[0] == 'Fatigue':
-                self.status_area.coords(self.status['fatigue'], 20, 5, 30, 5 + int(status_update[1]))
+                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
             elif status_update[0] == 'Encumbrance':
-                self.status_area.coords(self.status['encumbrance'], 35, 45, 15, 5 + int(status_update[1]))
+                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
             elif status_update[0] == 'Satiation':
-                self.status_area.coords(self.status['satiation'], 50, 5, 50, 5 + int(status_update[1]))
+                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
 
     def parse_skoot(self, skoot):
         pprint(skoot)
@@ -202,16 +202,16 @@ class ClientUI(tk.Frame):
             side_bar,
             name="status_area",
             width=65,
-            height=115,
+            height=105,
             bg='black')
-        self.status_area.create_rectangle(5, 5, 15, 105, fill="black", outline="red")
-        self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="red", outline="red")
-        self.status_area.create_rectangle(20, 5, 30, 105, fill="black", outline="yellow")
-        self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="yellow", outline="yellow")
-        self.status_area.create_rectangle(35, 5, 45, 105, fill="black", outline="blue")
-        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="blue", outline="blue")
-        self.status_area.create_rectangle(50, 5, 60, 105, fill="black", outline="green")
-        self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="green", outline="green")
+        self.status_area.create_rectangle(5, 5, 15, 105, fill="#3c0203", outline="#3c0203")
+        self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="#e30101", outline="#e30101")
+        self.status_area.create_rectangle(20, 5, 30, 105, fill="#3d3f04", outline="#3d3f04")
+        self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="#e2e201", outline="#e2e201")
+        self.status_area.create_rectangle(35, 5, 45, 105, fill="#023f3f", outline="#023f3f")
+        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2", outline="#00e2e2")
+        self.status_area.create_rectangle(50, 5, 60, 105, fill="#044006", outline="#044006")
+        self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="#00e201", outline="#00e201")
         self.status_area.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
