@@ -131,7 +131,11 @@ class Client:
         }
         url = 'https://www.skotos.net/user/login.php'
         response = requests.post(url, headers=header, data=data, allow_redirects=False)
-        # pprint(response.headers)
-        self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
-        self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)
+        try:
+            pprint(response.headers)
+            self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
+            self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)
+        except KeyError:
+            self.ui.draw_output('\nIncorrect credentials, please re-enter.')
+            self.login_user()
         self.ui.interrupt_input = False
