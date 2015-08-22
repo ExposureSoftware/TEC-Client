@@ -1,13 +1,13 @@
 __author__ = 'ToothlessRebel'
 from tkinter.font import Font
-from preferences.preferences import Preferences
 import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
 import html.parser
 from math import floor
-
 from pprint import pprint
+
+from preferences.preferences import Preferences
 
 
 class ClientUI(tk.Frame):
@@ -87,9 +87,10 @@ class ClientUI(tk.Frame):
                         color = re.match(r'font color="(#[0-9a-fA-F]{6})"', segment)
                         if color:
                             color = color.group(1)
-                            self.output_panel.tag_configure(color, foreground=color, font=self.output_panel.cget("font"))
+                            self.output_panel.tag_configure(color, foreground=color,
+                                                            font=self.output_panel.cget("font"))
                             tags.append(color)
-                        # @todo Handle sizes
+                            # @todo Handle sizes
                     elif re.match(r'hr', segment):
                         i = 0
                         line = ''
@@ -126,8 +127,26 @@ class ClientUI(tk.Frame):
             tabs += "    "
         return tabs
 
+    def update_status(self, status_update):
+        if status_update and status_update[0]:
+            if status_update[0] == 'Health':
+                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
+            elif status_update[0] == 'Fatigue':
+                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
+            elif status_update[0] == 'Encumbrance':
+                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
+            elif status_update[0] == 'Satiation':
+                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
+
     def parse_skoot(self, skoot):
         pprint(skoot)
+        skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
+        skoot_number = skoot_search.group(1)
+        if skoot_number != None:
+            if skoot_number == '8':
+                pprint(skoot_search.group(2))
+                status_update = re.split('\W+', skoot_search.group(2))
+                self.update_status(status_update)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -152,7 +171,7 @@ class ClientUI(tk.Frame):
 
     def create_widgets(self):
         scrollbar = tk.Scrollbar(self.master)
-        scrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
+        scrollbar.grid(row=0, column=1, sticky=tk.N + tk.S)
 
         output = tk.Text(
             self.master,
@@ -163,7 +182,7 @@ class ClientUI(tk.Frame):
         )
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
-        output.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
+        output.grid(row=0, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
         output.bind("<Configure>", self.set_line_length)
 
         input_area = tk.Entry(self.master, name="input")
@@ -171,24 +190,29 @@ class ClientUI(tk.Frame):
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
-        input_area.grid(row=1, sticky=tk.W+tk.E, columnspan=2)
+        input_area.grid(row=1, sticky=tk.W + tk.E, columnspan=2)
 
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
-        side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S+tk.N)
+        side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
 
+        self.status = dict()
         # The four status bars
-        status_area = tk.Canvas(
+        self.status_area = tk.Canvas(
             side_bar,
             name="status_area",
             width=65,
-            height=75,
+            height=105,
             bg='black')
-        status_area.create_rectangle(5, 5, 15, 75, fill="red", outline="red")
-        status_area.create_rectangle(20, 5, 30, 75, fill="yellow", outline="yellow")
-        status_area.create_rectangle(35, 5, 45, 75, fill="blue", outline="blue")
-        status_area.create_rectangle(50, 5, 60, 75, fill="green", outline="green")
-        status_area.pack(side='bottom')
+        self.status_area.create_rectangle(5, 5, 15, 105, fill="#3c0203", outline="#3c0203")
+        self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="#e30101", outline="#e30101")
+        self.status_area.create_rectangle(20, 5, 30, 105, fill="#3d3f04", outline="#3d3f04")
+        self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="#e2e201", outline="#e2e201")
+        self.status_area.create_rectangle(35, 5, 45, 105, fill="#023f3f", outline="#023f3f")
+        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2", outline="#00e2e2")
+        self.status_area.create_rectangle(50, 5, 60, 105, fill="#044006", outline="#044006")
+        self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="#00e201", outline="#00e201")
+        self.status_area.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
