@@ -34,6 +34,7 @@ class ClientUI(tk.Frame):
         self.master.grid()
         tk.Grid.rowconfigure(self.master, 0, weight=1)
         tk.Grid.columnconfigure(self.master, 0, weight=1)
+        self.status = dict()
         self.create_widgets()
 
         # pprint(vars(master))
@@ -127,24 +128,15 @@ class ClientUI(tk.Frame):
             tabs += "    "
         return tabs
 
-    def update_status(self, status_update):
-        if status_update and status_update[0]:
-            if status_update[0] == 'Health':
-                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
-            elif status_update[0] == 'Fatigue':
-                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
-            elif status_update[0] == 'Encumbrance':
-                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
-            elif status_update[0] == 'Satiation':
-                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
-
     def parse_skoot(self, skoot):
         pprint(skoot)
         skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
         skoot_number = skoot_search.group(1)
         if skoot_number != None:
-            if skoot_number == '8':
-                pprint(skoot_search.group(2))
+            if skoot_number == '7':
+                compass_update = re.split('\W+', skoot_search.group(2))
+                self.update_compass(compass_update)
+            elif skoot_number == '8':
                 status_update = re.split('\W+', skoot_search.group(2))
                 self.update_status(status_update)
 
@@ -195,24 +187,63 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+        self.create_status_area(side_bar)
+        self.create_compass_area(side_bar)
 
-        self.status = dict()
-        # The four status bars
-        self.status_area = tk.Canvas(
-            side_bar,
-            name="status_area",
-            width=65,
-            height=105,
-            bg='black')
+    def create_status_area(self, side_bar):
+        self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
+
         self.status_area.create_rectangle(5, 5, 15, 105, fill="#3c0203", outline="#3c0203")
         self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="#e30101", outline="#e30101")
+
         self.status_area.create_rectangle(20, 5, 30, 105, fill="#3d3f04", outline="#3d3f04")
         self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="#e2e201", outline="#e2e201")
+
         self.status_area.create_rectangle(35, 5, 45, 105, fill="#023f3f", outline="#023f3f")
-        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2", outline="#00e2e2")
+        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2",
+                                                                       outline="#00e2e2")
+
         self.status_area.create_rectangle(50, 5, 60, 105, fill="#044006", outline="#044006")
         self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="#00e201", outline="#00e201")
         self.status_area.pack(side='bottom')
+
+    def update_status(self, status_update):
+        if status_update and status_update[0]:
+            if status_update[0] == 'Health':
+                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
+            elif status_update[0] == 'Fatigue':
+                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
+            elif status_update[0] == 'Encumbrance':
+                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
+            elif status_update[0] == 'Satiation':
+                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
+
+    def create_compass_area(self, side_bar):
+        self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
+        self.compass = dict()
+        self.compass['nw'] = self.compass_area.create_rectangle(5, 5, 25, 25, fill="grey", tags="nw")
+        self.compass['n'] = self.compass_area.create_rectangle(30, 5, 50, 25, fill="grey", tags="n")
+        self.compass['ne'] = self.compass_area.create_rectangle(55, 5, 75, 25, fill="grey", tags="ne")
+
+        self.compass['w'] = self.compass_area.create_rectangle(5, 30, 25, 50, fill="grey", tags="w")
+        self.compass['u'] = self.compass_area.create_polygon([30, 30, 48, 30, 30, 48], fill="grey", tags="u")
+        self.compass['d'] = self.compass_area.create_polygon([50, 32, 50, 50, 32, 50], fill="grey", tags="d")
+        self.compass['e'] = self.compass_area.create_rectangle(55, 30, 75, 50, fill="grey", tags="e")
+
+        self.compass['sw'] = self.compass_area.create_rectangle(5, 55, 25, 75, fill="grey", tags="sw")
+        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="sw")
+        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="sw")
+
+        self.compass_area.pack(side='bottom')
+
+        for key, value in self.compass.items():
+            self.compass_area.tag_bind(value, '<ButtonPress-1>',
+                                       lambda event, direction=key: self.send_command("go " + direction))
+
+    def update_compass(self, compass_update):
+        for i in range(0, 20, 2):
+            color = "white" if compass_update[i + 1] == 'show' else 'grey'
+            self.compass_area.itemconfigure(self.compass[compass_update[i]], fill=color)
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
