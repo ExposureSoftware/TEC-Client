@@ -129,17 +129,21 @@ class ClientUI(tk.Frame):
         return tabs
 
     def parse_skoot(self, skoot):
-        pprint(skoot)
         skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
         skoot_number = skoot_search.group(1)
         if skoot_number != None:
-            if skoot_number == '7':
+            if skoot_number =='6':
+                map_update = skoot_search.group(2).split(',')
+                map_elements = [map_update[x:x+5] for x in range(0, len(map_update),5)]
+                pprint(map_elements)
+            elif skoot_number == '7':
                 compass_update = re.split('\W+', skoot_search.group(2))
                 self.update_compass(compass_update)
             elif skoot_number == '8':
                 status_update = re.split('\W+', skoot_search.group(2))
                 self.update_status(status_update)
-
+            else:
+                pprint(skoot)
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
