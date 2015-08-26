@@ -132,11 +132,10 @@ class ClientUI(tk.Frame):
         skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
         skoot_number = skoot_search.group(1)
         if skoot_number != None:
-            if skoot_number =='6':
+            if skoot_number == '6':
                 map_update = skoot_search.group(2).split(',')
-                map_elements = [map_update[x:x+5] for x in range(0, len(map_update),5)]
+                map_elements = [map_update[x:x + 5] for x in range(0, len(map_update), 5)]
                 self.update_map(map_elements)
-                pprint(map_elements)
             elif skoot_number == '7':
                 compass_update = re.split('\W+', skoot_search.group(2))
                 self.update_compass(compass_update)
@@ -145,6 +144,7 @@ class ClientUI(tk.Frame):
                 self.update_status(status_update)
             else:
                 pprint(skoot)
+
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
@@ -284,10 +284,13 @@ class ClientUI(tk.Frame):
         prefs.grid()
 
     def update_map(self, map_elements):
+        self.map_area.delete("all")
         for position in map_elements:
-            self.map_area.create_rectangle()
-        pass
+            size = int(position[2])
+            x = int(position[0]) + 50
+            y = int(position[1]) + 50 + size
+            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=100, height=100, bg='black')
-        self.status_area.pack(side='bottom')
+        self.map_area.pack(side='bottom')
