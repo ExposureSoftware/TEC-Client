@@ -135,6 +135,7 @@ class ClientUI(tk.Frame):
             if skoot_number =='6':
                 map_update = skoot_search.group(2).split(',')
                 map_elements = [map_update[x:x+5] for x in range(0, len(map_update),5)]
+                self.update_map(map_elements)
                 pprint(map_elements)
             elif skoot_number == '7':
                 compass_update = re.split('\W+', skoot_search.group(2))
@@ -193,6 +194,7 @@ class ClientUI(tk.Frame):
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
+        self.create_map_area(side_bar)
 
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
@@ -280,3 +282,12 @@ class ClientUI(tk.Frame):
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
+
+    def update_map(self, map_elements):
+        for position in map_elements:
+            self.map_area.create_rectangle()
+        pass
+
+    def create_map_area(self, side_bar):
+        self.map_area = tk.Canvas(side_bar, name="map", width=100, height=100, bg='black')
+        self.status_area.pack(side='bottom')
