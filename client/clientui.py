@@ -129,16 +129,25 @@ class ClientUI(tk.Frame):
         return tabs
 
     def parse_skoot(self, skoot):
-        pprint(skoot)
         skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
         skoot_number = skoot_search.group(1)
-        if skoot_number != None:
-            if skoot_number == '7':
+        if skoot_number is not None:
+            if skoot_number == '6':
+                map_update = skoot_search.group(2).split(',')
+                map_elements = [map_update[x:x + 5] for x in range(0, len(map_update), 5)]
+                self.update_map(map_elements)
+            elif skoot_number == '7':
                 compass_update = re.split('\W+', skoot_search.group(2))
                 self.update_compass(compass_update)
             elif skoot_number == '8':
                 status_update = re.split('\W+', skoot_search.group(2))
                 self.update_status(status_update)
+            elif skoot_number == '10':
+                exit_update = skoot_search.group(2).split(',')
+                exit_elements = [exit_update[x:x + 4] for x in range(0, len(exit_update), 4)]
+                self.update_exits(exit_elements)
+            else:
+                pprint(skoot)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -189,6 +198,7 @@ class ClientUI(tk.Frame):
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
+        self.create_map_area(side_bar)
 
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
@@ -245,6 +255,48 @@ class ClientUI(tk.Frame):
             color = "white" if compass_update[i + 1] == 'show' else 'grey'
             self.compass_area.itemconfigure(self.compass[compass_update[i]], fill=color)
 
+    def update_exits(self, connections):
+        for position in connections:
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60
+            color = "white" if position[3] == "1" else "black"
+            coords = self.compute_exit_line(x, y, position[2])
+            self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
+            self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
+            self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
+
+    @staticmethod
+    # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
+    def compute_exit_line(x, y, direction):
+        if direction == "ver":
+            return [[x - 2, y + 5, x - 2, y - 5],
+                    [x, y + 5, x, y - 5],
+                    [x + 2, y + 5, x + 2, y - 5]]
+        elif direction == "hor":
+            return [[x + 5, y - 2, x - 5, y - 2],
+                    [x + 5, y, x - 5, y],
+                    [x + 5, y + 2, x - 5, y + 2]]
+        elif direction == "ne" or direction == "sw":
+            return [[x - 3, y + 4, x + 3, y - 4],
+                    [x - 3, y + 3, x + 3, y - 3],
+                    [x - 3, y + 2, x + 3, y - 2]]
+        elif direction == "nw" or direction == "se":
+            return [[x - 3, y - 4, x + 3, y + 4],
+                    [x - 3, y - 3, x + 3, y + 3],
+                    [x - 3, y - 2, x + 3, y + 2]]
+
+    def update_map(self, map_elements):
+        self.map_area.delete("all")
+        for position in map_elements:
+            size = int(position[2])
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60 + size
+            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+
+    def create_map_area(self, side_bar):
+        self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
+        self.map_area.pack(side='bottom')
+
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
             self.input_cursor += 1
@@ -276,3 +328,5 @@ class ClientUI(tk.Frame):
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
+
+
