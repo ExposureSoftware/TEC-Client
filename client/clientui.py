@@ -257,8 +257,8 @@ class ClientUI(tk.Frame):
 
     def update_exits(self, connections):
         for position in connections:
-            x = int(position[0]) + 50
-            y = int(position[1]) + 50
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60
             color = "white" if position[3] == "1" else "black"
             coords = self.compute_exit_line(x, y, position[2])
             self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
@@ -289,12 +289,12 @@ class ClientUI(tk.Frame):
         self.map_area.delete("all")
         for position in map_elements:
             size = int(position[2])
-            x = int(position[0]) + 50
-            y = int(position[1]) + 50 + size
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60 + size
             self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):
-        self.map_area = tk.Canvas(side_bar, name="map", width=100, height=100, bg='black')
+        self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
         self.map_area.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
