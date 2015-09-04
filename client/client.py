@@ -130,7 +130,7 @@ class Client:
             'submit': 'true'
         }
         url = 'https://www.skotos.net/user/login.php'
-        response = requests.post(url, headers=header, data=data, allow_redirects=False)
+        response = requests.post(url, headers=header, data=data, allow_redirects=False, verify=False)
         try:
             pprint(response.headers)
             self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
