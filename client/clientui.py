@@ -257,13 +257,14 @@ class ClientUI(tk.Frame):
 
     def update_exits(self, connections):
         for position in connections:
-            x = int(position[0]) + 50
-            y = int(position[1]) + 50
-            color = "white" if position[3] == "1" else "black"
-            coords = self.compute_exit_line(x, y, position[2])
-            self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
-            self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
-            self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
+            if len(position) == 4:
+                x = int(position[0]) + 50
+                y = int(position[1]) + 50
+                color = "white" if position[3] == "1" else "black"
+                coords = self.compute_exit_line(x, y, position[2])
+                self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
+                self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
+                self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
 
     @staticmethod
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
