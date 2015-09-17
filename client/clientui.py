@@ -41,7 +41,7 @@ class ClientUI(tk.Frame):
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
         self.output_panel.configure(state="normal")
-        self.output_panel.bind('<Key>',lambda e: 'break')
+        self.output_panel.bind('<Key>', lambda e: 'break')
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
