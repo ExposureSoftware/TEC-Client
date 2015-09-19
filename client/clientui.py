@@ -202,6 +202,7 @@ class ClientUI(tk.Frame):
             height=1
         )
         input_area.bind("<Return>", self.parse_input)
+        input_area.bind("<Enter>", self.parse_input)
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
