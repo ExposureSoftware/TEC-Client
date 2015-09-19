@@ -179,6 +179,7 @@ class ClientUI(tk.Frame):
 
         input_area = tk.Entry(self.master, name="input")
         input_area.bind("<Return>", self.parse_input)
+        input_area.bind("<Enter>", self.parse_input)
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
