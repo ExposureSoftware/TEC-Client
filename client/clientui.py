@@ -11,12 +11,13 @@ from preferences.preferences import Preferences
 
 
 class ClientUI(tk.Frame):
-    def __init__(self, master, client, queue, send_command):
+    def __init__(self, master, client, queue, send_command, plugin_manager):
         super(ClientUI, self).__init__()
         self.client = client
         self.queue = queue
         self.send_command = send_command
         self.master = master
+        self.plugin_manager = plugin_manager
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
@@ -150,11 +151,14 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        self.output_panel.configure(state="normal")
-        # scroll_position = self.output_panel.scrollbar.get()
-        self.output_panel.insert(tk.END, text, tags)
-        self.output_panel.configure(state="disabled")
-        self.scroll_output()
+        text_handled = self.plugin_manager.pre_draw_plugin(text,tags)
+        if not text_handled:
+            self.output_panel.configure(state="normal")
+            # scroll_position = self.output_panel.scrollbar.get()
+            self.output_panel.insert(tk.END, text, tags)
+            self.outtput_panel.configure(state="disabled")
+            self.scroll_output()
+        self.plugin_manager.post_draw_plugin(text,tags)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
