@@ -11,12 +11,13 @@ __author__ = 'ToothlessRebel'
 
 
 class ClientUI(tk.Frame):
-    def __init__(self, master, client, queue, send_command):
+    def __init__(self, master, client, queue, send_command, plugin_manager):
         super(ClientUI, self).__init__()
         self.client = client
         self.queue = queue
         self.send_command = send_command
         self.master = master
+        self.plugin_manager = plugin_manager
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
@@ -183,7 +184,6 @@ class ClientUI(tk.Frame):
 
         output = tk.Text(
             output_frame,
-            state=tk.DISABLED,
             name="output",
             yscrollcommand=scrollbar.set,
             wrap=tk.WORD
