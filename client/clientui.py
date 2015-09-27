@@ -151,12 +151,12 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        text_handled = self.plugin_manager.pre_draw_plugin(text,tags)
+        text_handled = self.plugin_manager.pre_draw_plugins(text,tags)
         if not text_handled:
             self.output_panel.configure(state="normal")
             # scroll_position = self.output_panel.scrollbar.get()
             self.output_panel.insert(tk.END, text, tags)
-            self.outtput_panel.configure(state="disabled")
+            self.output_panel.configure(state="disabled")
             self.scroll_output()
         self.plugin_manager.post_draw_plugin(text,tags)
 
