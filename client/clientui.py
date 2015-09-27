@@ -212,6 +212,7 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+        self.MAP_OFFSET = 60
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
