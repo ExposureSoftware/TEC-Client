@@ -4,7 +4,6 @@ import re
 from collections import deque
 import html.parser
 from math import floor
-
 from preferences.preferences import Preferences
 
 __author__ = 'ToothlessRebel'
@@ -156,6 +155,11 @@ class ClientUI(tk.Frame):
     def draw_output(self, text, tags=None):
         self.output_panel.insert(tk.END, text, tags)
         self.scroll_output()
+        text_handled = self.plugin_manager.pre_draw_plugins(text,tags)
+        if not text_handled:
+            self.output_panel.insert(tk.END, text, tags)
+            self.scroll_output()
+        self.plugin_manager.post_draw_plugin(text,tags)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):

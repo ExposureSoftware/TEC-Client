@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from plugin_manager.plugin_manager import PluginManager
 from socket import socket
 from queue import Queue
 from time import sleep
@@ -25,8 +26,8 @@ class Client:
         self.config = ConfigParser()
         if self.config.read('config.ini').__len__() < 1:
             raise EnvironmentError
-        self.plugin_manager = PluginManager(master,self)
-        self.ui = ClientUI(master, self, self.queue, self.send)
+        self.plugin_manager = PluginManager()
+        self.ui = ClientUI(master, self, self.queue, self.send, self.plugin_manager)
         self.socket = socket()
         self.listener = None
         self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")
