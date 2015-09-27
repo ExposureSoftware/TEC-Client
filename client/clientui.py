@@ -200,6 +200,7 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+        self.MAP_OFFSET = 60
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
@@ -262,8 +263,8 @@ class ClientUI(tk.Frame):
     def update_exits(self, connections):
         for position in connections:
             if len(position) == 4:
-                x = int(position[0]) + 50
-                y = int(position[1]) + 50
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET
                 color = "white" if position[3] == "1" else "black"
                 coords = self.compute_exit_line(x, y, position[2])
                 self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
@@ -294,8 +295,8 @@ class ClientUI(tk.Frame):
         self.map_area.delete("all")
         for position in map_elements:
             size = int(position[2])
-            x = int(position[0]) + 60
-            y = int(position[1]) + 60 + size
+            x = int(position[0]) + self.MAP_OFFSET
+            y = int(position[1]) + self.MAP_OFFSET + size
             self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):
