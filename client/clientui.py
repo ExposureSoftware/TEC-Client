@@ -23,6 +23,7 @@ class ClientUI(tk.Frame):
         self.input_buffer = []
         self.input_cursor = 0
         self.list_depth = 0
+        self.MAP_OFFSET = 60;
 
         menu_bar = tk.Menu(master)
         self.menu_file = tk.Menu(menu_bar, tearoff=0)
@@ -267,8 +268,8 @@ class ClientUI(tk.Frame):
     def update_exits(self, connections):
         for position in connections:
             if len(position) == 4:
-                x = int(position[0]) + 50
-                y = int(position[1]) + 50
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET
                 color = "white" if position[3] == "1" else "black"
                 coords = self.compute_exit_line(x, y, position[2])
                 self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
@@ -299,8 +300,8 @@ class ClientUI(tk.Frame):
         self.map_area.delete("all")
         for position in map_elements:
             size = int(position[2])
-            x = int(position[0]) + 60
-            y = int(position[1]) + 60 + size
+            x = int(position[0]) + self.MAP_OFFSET
+            y = int(position[1]) + self.MAP_OFFSET + size
             self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):

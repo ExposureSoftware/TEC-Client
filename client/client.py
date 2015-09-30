@@ -29,7 +29,7 @@ class Client:
         self.config = ConfigParser()
         if self.config.read('config.ini').__len__() < 1:
             raise EnvironmentError
-        self.plugin_manager = PluginManager()
+        self.plugin_manager = PluginManager(self.send)
         self.ui = ClientUI(master, self, self.queue, self.send, self.plugin_manager)
         self.socket = socket()
         self.listener = None
