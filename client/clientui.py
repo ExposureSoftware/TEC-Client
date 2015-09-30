@@ -218,6 +218,11 @@ class ClientUI(tk.Frame):
         self.create_map_area(side_bar)
         self.create_macro_area(side_bar)
 
+        # This is the side bar configuration.
+        plugin_bar = tk.Frame(name="plugin_bar")
+        plugin_bar.grid(row=0, column=4, rowspan=2, sticky=tk.S + tk.N)
+        self.plugin_manager.create_plugin_area(plugin_bar)
+
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
 

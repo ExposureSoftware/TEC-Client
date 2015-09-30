@@ -5,3 +5,6 @@ class Plugin:
     def process(self, line):
         if "look" in line:
             print("You looked!")
+
+    def draw(self, plugin_area):
+        pass
