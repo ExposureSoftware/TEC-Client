@@ -24,6 +24,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+build_log
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -58,4 +59,6 @@ docs/_build/
 # PyBuilder
 target/
 
-
+# Project Files
+crash_log.txt
+myconfig.ini
