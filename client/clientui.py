@@ -159,7 +159,10 @@ class ClientUI(tk.Frame):
         if not text_handled:
             self.output_panel.insert(tk.END, text, tags)
             self.scroll_output()
-        self.plugin_manager.post_draw_plugin(text,tags)
+        try:
+            self.plugin_manager.post_draw_plugin(text, tags)
+        except Exception as e:
+            print(e)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
@@ -378,5 +381,3 @@ class ClientUI(tk.Frame):
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
-
-
