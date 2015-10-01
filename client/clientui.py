@@ -151,14 +151,21 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        text_handled = self.plugin_manager.pre_draw_plugins(text,tags)
+        text_handled = True
+        try:
+            text_handled = self.plugin_manager.pre_draw_plugins(text, tags)
+        except Exception as e:
+            print(e)
         if not text_handled:
             self.output_panel.configure(state="normal")
             # scroll_position = self.output_panel.scrollbar.get()
             self.output_panel.insert(tk.END, text, tags)
             self.output_panel.configure(state="disabled")
             self.scroll_output()
-        self.plugin_manager.post_draw_plugin(text,tags)
+        try:
+            self.plugin_manager.post_draw_plugin(text, tags)
+        except Exception as e:
+            print(e)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
@@ -267,7 +274,7 @@ class ClientUI(tk.Frame):
                 y = int(position[1]) + self.MAP_OFFSET
                 color = "white" if position[3] == "1" else "black"
                 coords = self.compute_exit_line(x, y, position[2])
-                self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
+                self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=2)
                 self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
                 self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
 
@@ -275,21 +282,21 @@ class ClientUI(tk.Frame):
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
     def compute_exit_line(x, y, direction):
         if direction == "ver":
-            return [[x - 2, y + 5, x - 2, y - 5],
+            return [[x - 1, y + 5, x - 1, y - 5],
                     [x, y + 5, x, y - 5],
-                    [x + 2, y + 5, x + 2, y - 5]]
+                    [x + 1, y + 5, x + 1, y - 5]]
         elif direction == "hor":
-            return [[x + 5, y - 2, x - 5, y - 2],
+            return [[x + 5, y - 1, x - 5, y - 1],
                     [x + 5, y, x - 5, y],
-                    [x + 5, y + 2, x - 5, y + 2]]
+                    [x + 5, y + 1, x - 5, y + 1]]
         elif direction == "ne" or direction == "sw":
             return [[x - 3, y + 4, x + 3, y - 4],
                     [x - 3, y + 3, x + 3, y - 3],
-                    [x - 3, y + 2, x + 3, y - 2]]
+                    [x - 3, y + 1, x + 3, y - 1]]
         elif direction == "nw" or direction == "se":
             return [[x - 3, y - 4, x + 3, y + 4],
                     [x - 3, y - 3, x + 3, y + 3],
-                    [x - 3, y - 2, x + 3, y + 2]]
+                    [x - 3, y - 1, x + 3, y + 1]]
 
     def update_map(self, map_elements):
         self.map_area.delete("all")
@@ -334,5 +341,3 @@ class ClientUI(tk.Frame):
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
-
-
