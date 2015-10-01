@@ -24,3 +24,7 @@ class PluginManager():
     def post_draw_plugin(self, line, tags):
         for plugin in self.plugins.values():
             plugin.process(line)
+
+    def create_plugin_area(self, plugin_area):
+        for plugin in self.plugins.values():
+            plugin.draw(plugin_area)
