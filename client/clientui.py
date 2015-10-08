@@ -34,11 +34,13 @@ class ClientUI(tk.Frame):
         self.master.grid()
         tk.Grid.rowconfigure(self.master, 0, weight=1)
         tk.Grid.columnconfigure(self.master, 0, weight=1)
+        self.status = dict()
         self.create_widgets()
 
         # pprint(vars(master))
         self.side_bar = master.children['side_bar']
-        self.output_panel = master.children['output']
+        self.output_panel = master.children['output_frame'].children['output']
+        # self.output_panel = self.output_frame.children['output']
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
@@ -127,26 +129,26 @@ class ClientUI(tk.Frame):
             tabs += "    "
         return tabs
 
-    def update_status(self, status_update):
-        if status_update and status_update[0]:
-            if status_update[0] == 'Health':
-                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
-            elif status_update[0] == 'Fatigue':
-                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
-            elif status_update[0] == 'Encumbrance':
-                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
-            elif status_update[0] == 'Satiation':
-                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
-
     def parse_skoot(self, skoot):
-        pprint(skoot)
         skoot_search = re.search('SKOOT (\d+) (.*)', skoot)
         skoot_number = skoot_search.group(1)
-        if skoot_number != None:
-            if skoot_number == '8':
-                pprint(skoot_search.group(2))
+        if skoot_number is not None:
+            if skoot_number == '6':
+                map_update = skoot_search.group(2).split(',')
+                map_elements = [map_update[x:x + 5] for x in range(0, len(map_update), 5)]
+                self.update_map(map_elements)
+            elif skoot_number == '7':
+                compass_update = re.split('\W+', skoot_search.group(2))
+                self.update_compass(compass_update)
+            elif skoot_number == '8':
                 status_update = re.split('\W+', skoot_search.group(2))
                 self.update_status(status_update)
+            elif skoot_number == '10':
+                exit_update = skoot_search.group(2).split(',')
+                exit_elements = [exit_update[x:x + 4] for x in range(0, len(exit_update), 4)]
+                self.update_exits(exit_elements)
+            else:
+                pprint(skoot)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -170,11 +172,18 @@ class ClientUI(tk.Frame):
         return floor((width / self.char_width) - 10)
 
     def create_widgets(self):
-        scrollbar = tk.Scrollbar(self.master)
+        game_pane = tk.PanedWindow(self.master, orient=tk.VERTICAL)
+        game_pane.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+        output_frame = tk.Frame(self.master, name='output_frame')
+        output_frame.grid()
+        tk.Grid.rowconfigure(output_frame, 0, weight=1)
+        tk.Grid.columnconfigure(output_frame, 0, weight=1)
+
+        scrollbar = tk.Scrollbar(output_frame)
         scrollbar.grid(row=0, column=1, sticky=tk.N + tk.S)
 
         output = tk.Text(
-            self.master,
+            output_frame,
             state=tk.DISABLED,
             name="output",
             yscrollcommand=scrollbar.set,
@@ -183,36 +192,126 @@ class ClientUI(tk.Frame):
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
         output.grid(row=0, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
+        game_pane.add(output_frame)
         output.bind("<Configure>", self.set_line_length)
 
-        input_area = tk.Entry(self.master, name="input")
+        # input_area = tk.Entry(self.master, name="input")
+        input_area = tk.Text(
+            self.master,
+            name="input",
+            height=1
+        )
         input_area.bind("<Return>", self.parse_input)
+        input_area.bind("<Enter>", self.parse_input)
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
-        input_area.grid(row=1, sticky=tk.W + tk.E, columnspan=2)
+        # input_area.grid(row=1, sticky=tk.W + tk.E)
+        game_pane.add(input_area)
 
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+        self.create_status_area(side_bar)
+        self.create_compass_area(side_bar)
+        self.create_map_area(side_bar)
 
-        self.status = dict()
-        # The four status bars
-        self.status_area = tk.Canvas(
-            side_bar,
-            name="status_area",
-            width=65,
-            height=105,
-            bg='black')
+    def create_status_area(self, side_bar):
+        self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
+
         self.status_area.create_rectangle(5, 5, 15, 105, fill="#3c0203", outline="#3c0203")
         self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="#e30101", outline="#e30101")
+
         self.status_area.create_rectangle(20, 5, 30, 105, fill="#3d3f04", outline="#3d3f04")
         self.status['fatigue'] = self.status_area.create_rectangle(20, 5, 30, 105, fill="#e2e201", outline="#e2e201")
+
         self.status_area.create_rectangle(35, 5, 45, 105, fill="#023f3f", outline="#023f3f")
-        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2", outline="#00e2e2")
+        self.status['encumbrance'] = self.status_area.create_rectangle(35, 5, 45, 105, fill="#00e2e2",
+                                                                       outline="#00e2e2")
+
         self.status_area.create_rectangle(50, 5, 60, 105, fill="#044006", outline="#044006")
         self.status['satiation'] = self.status_area.create_rectangle(50, 5, 60, 105, fill="#00e201", outline="#00e201")
         self.status_area.pack(side='bottom')
+
+    def update_status(self, status_update):
+        if status_update and status_update[0]:
+            if status_update[0] == 'Health':
+                self.status_area.coords(self.status['health'], 5, 105 - int(status_update[1]), 15, 105)
+            elif status_update[0] == 'Fatigue':
+                self.status_area.coords(self.status['fatigue'], 20, 105 - int(status_update[1]), 30, 105)
+            elif status_update[0] == 'Encumbrance':
+                self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
+            elif status_update[0] == 'Satiation':
+                self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
+
+    def create_compass_area(self, side_bar):
+        self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
+        self.compass = dict()
+        self.compass['nw'] = self.compass_area.create_rectangle(5, 5, 25, 25, fill="grey", tags="nw")
+        self.compass['n'] = self.compass_area.create_rectangle(30, 5, 50, 25, fill="grey", tags="n")
+        self.compass['ne'] = self.compass_area.create_rectangle(55, 5, 75, 25, fill="grey", tags="ne")
+
+        self.compass['w'] = self.compass_area.create_rectangle(5, 30, 25, 50, fill="grey", tags="w")
+        self.compass['u'] = self.compass_area.create_polygon([30, 30, 48, 30, 30, 48], fill="grey", tags="u")
+        self.compass['d'] = self.compass_area.create_polygon([50, 32, 50, 50, 32, 50], fill="grey", tags="d")
+        self.compass['e'] = self.compass_area.create_rectangle(55, 30, 75, 50, fill="grey", tags="e")
+
+        self.compass['sw'] = self.compass_area.create_rectangle(5, 55, 25, 75, fill="grey", tags="sw")
+        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="sw")
+        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="sw")
+
+        self.compass_area.pack(side='bottom')
+
+        for key, value in self.compass.items():
+            self.compass_area.tag_bind(value, '<ButtonPress-1>',
+                                       lambda event, direction=key: self.send_command("go " + direction))
+
+    def update_compass(self, compass_update):
+        for i in range(0, 20, 2):
+            color = "white" if compass_update[i + 1] == 'show' else 'grey'
+            self.compass_area.itemconfigure(self.compass[compass_update[i]], fill=color)
+
+    def update_exits(self, connections):
+        for position in connections:
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60
+            color = "white" if position[3] == "1" else "black"
+            coords = self.compute_exit_line(x, y, position[2])
+            self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
+            self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
+            self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
+
+    @staticmethod
+    # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
+    def compute_exit_line(x, y, direction):
+        if direction == "ver":
+            return [[x - 2, y + 5, x - 2, y - 5],
+                    [x, y + 5, x, y - 5],
+                    [x + 2, y + 5, x + 2, y - 5]]
+        elif direction == "hor":
+            return [[x + 5, y - 2, x - 5, y - 2],
+                    [x + 5, y, x - 5, y],
+                    [x + 5, y + 2, x - 5, y + 2]]
+        elif direction == "ne" or direction == "sw":
+            return [[x - 3, y + 4, x + 3, y - 4],
+                    [x - 3, y + 3, x + 3, y - 3],
+                    [x - 3, y + 2, x + 3, y - 2]]
+        elif direction == "nw" or direction == "se":
+            return [[x - 3, y - 4, x + 3, y + 4],
+                    [x - 3, y - 3, x + 3, y + 3],
+                    [x - 3, y - 2, x + 3, y + 2]]
+
+    def update_map(self, map_elements):
+        self.map_area.delete("all")
+        for position in map_elements:
+            size = int(position[2])
+            x = int(position[0]) + 60
+            y = int(position[1]) + 60 + size
+            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+
+    def create_map_area(self, side_bar):
+        self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
+        self.map_area.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
@@ -224,16 +323,16 @@ class ClientUI(tk.Frame):
             self.input_cursor -= 1
             self.set_input()
         else:
-            self.input.delete(0, tk.END)
+            self.input.delete('1.0', tk.END)
 
     def set_input(self):
-        self.input.delete(0, tk.END)
-        self.input.insert(0, self.input_buffer[-self.input_cursor])
+        self.input.delete('1.0', tk.END)
+        self.input.insert('1.0', self.input_buffer[-self.input_cursor])
 
     def parse_input(self, user_input):
-        text = user_input.widget.get()
-        self.input_buffer.append(user_input.widget.get())
-        user_input.widget.delete(0, tk.END)
+        text = user_input.widget.get('1.0', 'end-1c')
+        self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
+        user_input.widget.delete('1.0', tk.END)
         if not self.interrupt_input:
             self.send_command(text)
         else:
@@ -242,6 +341,10 @@ class ClientUI(tk.Frame):
             self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
 
+        return 'break'
+
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
+
+
