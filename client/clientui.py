@@ -44,7 +44,8 @@ class ClientUI(tk.Frame):
 
         # pprint(vars(master))
         self.side_bar = master.children['side_bar']
-        self.output_panel = master.children['output']
+        self.output_panel = master.children['output_frame'].children['output']
+        # self.output_panel = self.output_frame.children['output']
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
@@ -181,11 +182,18 @@ class ClientUI(tk.Frame):
         return floor((width / self.char_width) - 10)
 
     def create_widgets(self):
-        scrollbar = tk.Scrollbar(self.master)
+        game_pane = tk.PanedWindow(self.master, orient=tk.VERTICAL)
+        game_pane.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+        output_frame = tk.Frame(self.master, name='output_frame')
+        output_frame.grid()
+        tk.Grid.rowconfigure(output_frame, 0, weight=1)
+        tk.Grid.columnconfigure(output_frame, 0, weight=1)
+
+        scrollbar = tk.Scrollbar(output_frame)
         scrollbar.grid(row=0, column=1, sticky=tk.N + tk.S)
 
         output = tk.Text(
-            self.master,
+            output_frame,
             state=tk.DISABLED,
             name="output",
             yscrollcommand=scrollbar.set,
@@ -194,14 +202,22 @@ class ClientUI(tk.Frame):
         scrollbar.config(command=output.yview)
         output.scrollbar = scrollbar
         output.grid(row=0, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
+        game_pane.add(output_frame)
         output.bind("<Configure>", self.set_line_length)
 
-        input_area = tk.Entry(self.master, name="input")
+        # input_area = tk.Entry(self.master, name="input")
+        input_area = tk.Text(
+            self.master,
+            name="input",
+            height=1
+        )
         input_area.bind("<Return>", self.parse_input)
+        input_area.bind("<Enter>", self.parse_input)
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
-        input_area.grid(row=1, sticky=tk.W + tk.E, columnspan=2)
+        # input_area.grid(row=1, sticky=tk.W + tk.E)
+        game_pane.add(input_area)
 
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
@@ -326,19 +342,16 @@ class ClientUI(tk.Frame):
             self.input_cursor -= 1
             self.set_input()
         else:
-            self.input.delete(0, tk.END)
+            self.input.delete('1.0', tk.END)
 
     def set_input(self):
-        self.input.delete(0, tk.END)
-        self.input.insert(0, self.input_buffer[-self.input_cursor])
+        self.input.delete('1.0', tk.END)
+        self.input.insert('1.0', self.input_buffer[-self.input_cursor])
 
     def parse_input(self, user_input):
-        text = user_input.widget.get()
-        self.input_buffer.append(user_input.widget.get())
-        user_input.widget.delete(0, tk.END)
-        self.send_command_with_preferences(text)
-
-    def send_command_with_preferences(self, text):
+        text = user_input.widget.get('1.0', 'end-1c')
+        self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
+        user_input.widget.delete('1.0', tk.END)
         if not self.interrupt_input:
             self.send_command(text)
         else:
@@ -346,6 +359,8 @@ class ClientUI(tk.Frame):
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
+
+        return 'break'
 
     def show_preferences(self):
         prefs = Preferences(self.client)

@@ -141,4 +141,5 @@ class Client:
         except KeyError:
             self.ui.draw_output('\nIncorrect credentials, please re-enter.')
             self.login_user()
+        response = requests.post(url, headers=header, data=data, allow_redirects=False, verify=False)
         self.ui.interrupt_input = False
