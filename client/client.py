@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-__author__ = 'ToothlessRebel'
 from socket import socket
 from queue import Queue
 from time import sleep
@@ -12,14 +11,13 @@ import requests
 import re
 import hashlib
 
-from pprint import pprint
+__author__ = 'ToothlessRebel'
 
 
 class Client:
     def __init__(self, master):
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.DEBUG)
-        pprint(self.log.getEffectiveLevel())
         self.log.warning('Starting logger.')
         self.master = master
         self.queue = Queue()
@@ -73,7 +71,6 @@ class Client:
             game_log.write(text)
 
     def listen(self):
-        pprint("Starting connection!")
         socket.connect(self.socket, ("tec.skotos.net", 6730))
         self.login_user()
         self.send("SKOTOS Zealous 0.7.12.2\n")
@@ -83,8 +80,9 @@ class Client:
             try:
                 buffer = str(self.socket.recv(4096), encoding='utf8')
             except Exception as exc:
-                pprint(exc.args)
-                pprint("SOMETHING BAD HAPPENED")
+                pass
+                # pprint(exc.args)
+                # pprint("SOMETHING BAD HAPPENED")
             buffer = buffer.splitlines()
             if not buffer.__len__() == 0:
                 for number, line in enumerate(buffer):
@@ -93,16 +91,14 @@ class Client:
                     else:
                         if line.find('SECRET') == 0:
                             secret = line[7:].strip()
-                            pprint(self.uname + self.pwd + secret)
                             hash_string = self.uname + self.pwd + secret
                             zealous_hash = hashlib.md5(hash_string.encode('utf-8')).hexdigest()
-                            pprint(zealous_hash)
                             self.send("USER " + self.uname)
                             self.send("SECRET " + secret)
                             self.send("HASH " + zealous_hash)
                             self.send("CHAR ")
             else:
-                pprint(buffer)
+                # pprint(buffer)
                 break
         if self.connect:
             self.shutdown()
@@ -132,7 +128,6 @@ class Client:
         url = 'https://www.skotos.net/user/login.php'
         response = requests.post(url, headers=header, data=data, allow_redirects=False, verify=False)
         try:
-            pprint(response.headers)
             self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
             self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)
         except KeyError:
