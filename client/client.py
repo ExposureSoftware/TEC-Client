@@ -71,14 +71,10 @@ class Client:
             game_log.write(text)
 
     def listen(self):
-        logged_in = False
-
         socket.connect(self.socket, ("tec.skotos.net", 6730))
+        self.login_user()
+        self.send("SKOTOS Zealous 0.7.12.2\n")
         while self.connect:
-            if not logged_in:
-                self.login_user()
-                logged_in = True
-                self.send("SKOTOS Zealous 0.7.12.2\n")
             buffer = ""
             sleep(0)
             try:
