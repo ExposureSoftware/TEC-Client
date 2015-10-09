@@ -294,8 +294,9 @@ class ClientUI(tk.Frame):
                 self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
                 self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
 
+    @staticmethod
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
-    def compute_exit_line(self, x, y, direction):
+    def compute_exit_line(x, y, direction):
         if direction == "ver":
             return [[x - 1, y + 5, x - 1, y - 5],
                     [x, y + 5, x, y - 5],

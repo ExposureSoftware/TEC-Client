@@ -4,7 +4,7 @@ import sys
 __author__ = 'pat'
 
 
-class PluginManager():
+class PluginManager:
     path = "plugin_manager/plugins"
     plugins = {}
 
