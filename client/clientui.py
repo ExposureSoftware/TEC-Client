@@ -156,7 +156,7 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command_with_preferences)
+        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command)
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
         try:
@@ -294,7 +294,7 @@ class ClientUI(tk.Frame):
 
     @staticmethod
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
-    def compute_exit_line(self, x, y, direction):
+    def compute_exit_line( x, y, direction):
         if direction == "ver":
             return [[x - 1, y + 5, x - 1, y - 5],
                     [x, y + 5, x, y - 5],

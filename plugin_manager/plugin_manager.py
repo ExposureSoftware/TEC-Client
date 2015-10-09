@@ -31,7 +31,7 @@ class PluginManager():
     def pre_draw_plugins(self, line, tags, send_command):
         for key, plugin in self.plugins.items():
             if self.plugin_status[key]:
-                plugin.process(line, send_command)
+                plugin.process(line)
 
         # Maybe we do something like AND the result of all the process calls? if any of them return that they handled it and we should not draw
         return False
