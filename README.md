@@ -27,5 +27,6 @@ Echoed commands are displayed in *italics*.
 If you wish to log all output from the session choose this box and provide a log destination.
 Logs are saved with file names formatted as `TECLogs<DD.MM.YYYY-HH.MM.SS>.txt` and are plain text.
 
-### Input
-Use of the up and down arrow keys will navigate the input buffer.
+### The Client
+#### Input
+Use the up and down arrow keys to navigate the input buffer.
