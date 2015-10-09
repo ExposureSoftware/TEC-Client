@@ -1,4 +1,3 @@
-__author__ = 'ToothlessRebel'
 from tkinter.font import Font
 import tkinter as tk  # @todo Import only what's needed.
 import re
@@ -8,6 +7,8 @@ from math import floor
 from pprint import pprint
 
 from preferences.preferences import Preferences
+
+__author__ = 'ToothlessRebel'
 
 
 class ClientUI(tk.Frame):
@@ -114,7 +115,6 @@ class ClientUI(tk.Frame):
                         tags.append('bold')
                     elif re.match(r'ul', segment):
                         self.list_depth += 1
-                        # pprint('List depth now raised to: ' + str(self.list_depth))
                         segment.replace('ul', '')
                         if re.match(r'li', segment):
                             segment = segment.replace('li', self.draw_tabs() + "* ")
@@ -205,18 +205,15 @@ class ClientUI(tk.Frame):
         game_pane.add(output_frame)
         output.bind("<Configure>", self.set_line_length)
 
-        # input_area = tk.Entry(self.master, name="input")
         input_area = tk.Text(
             self.master,
             name="input",
             height=1
         )
         input_area.bind("<Return>", self.parse_input)
-        input_area.bind("<Enter>", self.parse_input)
         input_area.bind("<Up>", self.traverse_up_input_buffer)
         input_area.bind("<Down>", self.traverse_down_input_buffer)
         input_area.focus()
-        # input_area.grid(row=1, sticky=tk.W + tk.E)
         game_pane.add(input_area)
 
         # This is the side bar configuration.
