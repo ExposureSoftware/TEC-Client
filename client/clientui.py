@@ -19,6 +19,7 @@ class ClientUI(tk.Frame):
         self.send_command = send_command
         self.master = master
         self.plugin_manager = plugin_manager
+        self.plugin_manager.setup(self.send_command_with_prefs, self.echo)
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
@@ -155,7 +156,7 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command)
+        self.plugin_manager.pre_process(text, tags)
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
         try:
@@ -164,7 +165,7 @@ class ClientUI(tk.Frame):
             print(e)
         self.output_panel.configure(state="disabled")
         self.scroll_output()
-        self.plugin_manager.post_draw_plugin(text, tags)
+        self.plugin_manager.post_process(text, tags)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
@@ -360,8 +361,12 @@ class ClientUI(tk.Frame):
             self.interrupt_buffer.append(text)
 
         if self.client.config['UI'].getboolean('echo_input'):
-            self.draw_output(("\n" + text), 'italic')
-            self.scroll_output()
+            self.echo(text)
+
+    def echo(self, text):
+        self.draw_output(("\n" + text), 'italic')
+        self.scroll_output()
+
 
     def show_preferences(self):
         prefs = Preferences(self.client)
@@ -374,7 +379,7 @@ class ClientUI(tk.Frame):
         self.menu_plugins = tk.Menu(menu_bar, tearoff=0)
         self.plugin_checkboxes = dict()
         for plugin in self.plugin_manager.plugins:
-            self.plugin_checkboxes[plugin] = tk.BooleanVar(value=self.plugin_manager.plugin_status[plugin])
+            self.plugin_checkboxes[plugin] = tk.BooleanVar(value=self.plugin_manager.plugin_enabled[plugin])
             self.menu_plugins.add_checkbutton(label=plugin, var=self.plugin_checkboxes[plugin],
                                               command=lambda name=plugin: self.toggle_plugin(name,
                                                                                              self.plugin_checkboxes[

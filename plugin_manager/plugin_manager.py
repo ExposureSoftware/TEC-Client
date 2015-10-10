@@ -9,11 +9,19 @@ class PluginManager():
 
     def __init__(self):
         self.plugins = {}
-        self.plugin_status = {}
+        self.plugin_enabled = {}
 
+        self.pre_process_plugins = []
+        self.post_process_plugins = []
+        self.ui_plugins = []
         self.create_status_api()
 
-        self.find_plugins(self.path)
+        for root, dirs, files in os.walk(self.path, topdown=True):
+            for d in dirs:
+                self.find_plugins(self.path + "/" + d)
+
+        self.send_command = None
+        self.echo = None
 
     def find_plugins(self, current_path):
         sys.path.insert(0, current_path)
@@ -23,58 +31,72 @@ class PluginManager():
                     name = name.strip(".py")
                     try:
                         mod = __import__(name)
-                        self.plugins[name] = mod.Plugin()
-                        self.plugin_status[name] = True
-                        if hasattr(mod, "health_update"):
-                            self.status_plugins['Health'].append(name)
-                        if hasattr(mod, "fatigue_update"):
-                            self.status_plugins['Fatigue'].append(name)
-                        if hasattr(mod, "encumbrance_update"):
-                            self.status_plugins['Encumbrance'].append(name)
-                        if hasattr(mod, "satiation_update"):
-                            self.status_plugins['Satiation'].append(name)
+                        if hasattr(mod, "Plugin"):
+                            self.plugins[name] = mod.Plugin()
+                            self.plugin_enabled[name] = True
+                            self.register_apis(name, mod)
                     except Exception as e:
                         pass
-            for name in dirs:
-                self.find_plugins(current_path + "/" + name)
+        sys.path.pop(0)
 
-    def pre_draw_plugins(self, line, tags, send_command):
-        for key, plugin in self.plugins.items():
-            if self.plugin_status[key]:
-                plugin.process(line, send_command)
-
-        # Maybe we do something like AND the result of all the process calls? if any of them return that they handled it and we should not draw
-        return False
-
-    def post_draw_plugin(self, line, tags):
-        pass
-
-    def create_plugin_area(self, plugin_area):
-        for key, plugin in self.plugins.items():
-            if self.plugin_status[key]:
-                plugin.draw(plugin_area)
+    def register_apis(self, name, mod):
+        if hasattr(mod, "pre_process"):
+            self.pre_process_plugins.append(name)
+        if hasattr(mod, "post_process"):
+            self.post_process_plugins.append(name)
+        if hasattr(mod, "draw"):
+            self.ui_plugins.append(name)
+        if hasattr(mod, "health_update"):
+            self.status_plugins['Health'].append(name)
+        if hasattr(mod, "fatigue_update"):
+            self.status_plugins['Fatigue'].append(name)
+        if hasattr(mod, "encumbrance_update"):
+            self.status_plugins['Encumbrance'].append(name)
+        if hasattr(mod, "satiation_update"):
+            self.status_plugins['Satiation'].append(name)
 
     def get_plugins(self):
         return self.plugins
 
     def toggle_plugin(self, name, is_enabled):
-        self.plugin_status[name] = is_enabled
+        self.plugin_enabled[name] = is_enabled
 
-    # Status Update API
+    def setup(self, send_command, echo):
+        self.send_command = send_command
+        self.echo = echo
+
+
+    ### Line Processing
+    def pre_process(self, line, tags):
+        for name in self.pre_process_plugins:
+            if self.plugin_enabled[name]:
+                self.plugins[name].pre_process(line, self.send_command, self.echo)
+
+        # Maybe we do something like AND the result of all the process calls?
+        # if any of them return that they handled it and we should not draw?
+        return False
+
+    def post_process(self, line, tags):
+        for name in self.post_process_plugins:
+            if self.plugin_enabled[name]:
+                self.plugins[name].post_process(line, self.send_command, self.echo)
+
+
+    ### Plugin UI Handling
+    def create_plugin_area(self, plugin_area):
+        for name in self.ui_plugins:
+            if self.plugin_enabled[name]:
+                self.plugins[name].draw(plugin_area)
+
+    ### Status Update API
     def create_status_api(self):
-        self.status_plugins = {}
-        self.status_plugins['Health'] = []
-        self.status_plugins['Fatigue'] = []
-        self.status_plugins['Encumbrance'] = []
-        self.status_plugins['Satiation'] = []
-        self.status_plugins_api_names = {}
-        self.status_plugins_api_names['Health'] = 'health_update'
-        self.status_plugins_api_names['Fatigue'] = 'fatigue_update'
-        self.status_plugins_api_names['Encumbrance'] = 'encumbrance_update'
-        self.status_plugins_api_names['Satiation'] = 'satiation_update'
+        self.status_plugins = {'Health': [], 'Fatigue': [], 'Encumbrance': [], 'Satiation': []}
+        self.status_plugins_api_names = {'Health': 'health_update', 'Fatigue': 'fatigue_update',
+                                         'Encumbrance': 'encumbrance_update', 'Satiation': 'satiation_update'}
 
     def status_update(self, status, value):
-        for plugin in self.status_plugins[status]:
-            if self.plugin_status[plugin]:
-                update_method = getattr(self.plugins[plugin], self.status_plugins_api_names[status])
+        for name in self.status_plugins[status]:
+            if self.plugin_enabled[name]:
+                update_method = getattr(self.plugins[name], self.status_plugins_api_names[status])
                 update_method(value)
+
