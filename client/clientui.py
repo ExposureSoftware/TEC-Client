@@ -46,7 +46,6 @@ class ClientUI(tk.Frame):
         # pprint(vars(master))
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
-        # self.output_panel = self.output_frame.children['output']
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
@@ -156,7 +155,7 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command_with_preferences)
+        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command)
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
         try:
@@ -254,6 +253,8 @@ class ClientUI(tk.Frame):
             elif status_update[0] == 'Satiation':
                 self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
 
+            self.plugin_manager.status_update(status_update[0], status_update[1])
+
     def create_compass_area(self, side_bar):
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
         self.compass = dict()
@@ -294,7 +295,7 @@ class ClientUI(tk.Frame):
 
     @staticmethod
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
-    def compute_exit_line(self, x, y, direction):
+    def compute_exit_line(x, y, direction):
         if direction == "ver":
             return [[x - 1, y + 5, x - 1, y - 5],
                     [x, y + 5, x, y - 5],
@@ -349,15 +350,18 @@ class ClientUI(tk.Frame):
         text = user_input.widget.get('1.0', 'end-1c')
         self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
         user_input.widget.delete('1.0', tk.END)
+        self.send_command_with_prefs(text)
+        return 'break'
+
+    def send_command_with_prefs(self, text):
         if not self.interrupt_input:
             self.send_command(text)
         else:
             self.interrupt_buffer.append(text)
+
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
-
-        return 'break'
 
     def show_preferences(self):
         prefs = Preferences(self.client)

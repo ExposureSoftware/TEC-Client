@@ -10,6 +10,9 @@ class PluginManager():
     def __init__(self):
         self.plugins = {}
         self.plugin_status = {}
+
+        self.create_status_api()
+
         self.find_plugins(self.path)
 
     def find_plugins(self, current_path):
@@ -22,6 +25,14 @@ class PluginManager():
                         mod = __import__(name)
                         self.plugins[name] = mod.Plugin()
                         self.plugin_status[name] = True
+                        if hasattr(mod, "health_update"):
+                            self.status_plugins['Health'].append(name)
+                        if hasattr(mod, "fatigue_update"):
+                            self.status_plugins['Fatigue'].append(name)
+                        if hasattr(mod, "encumbrance_update"):
+                            self.status_plugins['Encumbrance'].append(name)
+                        if hasattr(mod, "satiation_update"):
+                            self.status_plugins['Satiation'].append(name)
                     except Exception as e:
                         pass
             for name in dirs:
@@ -48,3 +59,22 @@ class PluginManager():
 
     def toggle_plugin(self, name, is_enabled):
         self.plugin_status[name] = is_enabled
+
+    # Status Update API
+    def create_status_api(self):
+        self.status_plugins = {}
+        self.status_plugins['Health'] = []
+        self.status_plugins['Fatigue'] = []
+        self.status_plugins['Encumbrance'] = []
+        self.status_plugins['Satiation'] = []
+        self.status_plugins_api_names = {}
+        self.status_plugins_api_names['Health'] = 'health_update'
+        self.status_plugins_api_names['Fatigue'] = 'fatigue_update'
+        self.status_plugins_api_names['Encumbrance'] = 'encumbrance_update'
+        self.status_plugins_api_names['Satiation'] = 'satiation_update'
+
+    def status_update(self, status, value):
+        for plugin in self.status_plugins[status]:
+            if self.plugin_status[plugin]:
+                update_method = getattr(self.plugins[plugin], self.status_plugins_api_names[status])
+                update_method(value)
