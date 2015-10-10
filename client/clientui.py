@@ -253,6 +253,8 @@ class ClientUI(tk.Frame):
             elif status_update[0] == 'Satiation':
                 self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
 
+            self.plugin_manager.status_update(status_update[0], status_update[1])
+
     def create_compass_area(self, side_bar):
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
         self.compass = dict()
@@ -348,16 +350,15 @@ class ClientUI(tk.Frame):
         text = user_input.widget.get('1.0', 'end-1c')
         self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
         user_input.widget.delete('1.0', tk.END)
+        self.send_command_with_prefs(text)
+        return 'break'
+
+    def send_command_with_prefs(self, text):
         if not self.interrupt_input:
             self.send_command(text)
         else:
             self.interrupt_buffer.append(text)
 
-        self.echo_if_enabled(text)
-
-        return 'break'
-
-    def echo_if_enabled(self, text):
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
