@@ -352,11 +352,15 @@ class ClientUI(tk.Frame):
             self.send_command(text)
         else:
             self.interrupt_buffer.append(text)
+
+        self.echo_if_enabled(text)
+
+        return 'break'
+
+    def echo_if_enabled(self, text):
         if self.client.config['UI'].getboolean('echo_input'):
             self.draw_output(("\n" + text), 'italic')
             self.scroll_output()
-
-        return 'break'
 
     def show_preferences(self):
         prefs = Preferences(self.client)
