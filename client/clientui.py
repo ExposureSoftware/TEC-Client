@@ -1,4 +1,3 @@
-__author__ = 'ToothlessRebel'
 from tkinter.font import Font
 import tkinter as tk  # @todo Import only what's needed.
 import re
@@ -156,10 +155,13 @@ class ClientUI(tk.Frame):
                 pprint(skoot)
 
     def draw_output(self, text, tags=None):
-        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command_with_preferences)
+        self.plugin_manager.pre_draw_plugins(text, tags, self.send_command)
         self.output_panel.configure(state="normal")
         # scroll_position = self.output_panel.scrollbar.get()
-        self.output_panel.insert(tk.END, text, tags)
+        try:
+            self.output_panel.insert(tk.END, text, tags)
+        except Exception as e:
+            print(e)
         self.output_panel.configure(state="disabled")
         self.scroll_output()
         self.plugin_manager.post_draw_plugin(text, tags)
@@ -346,9 +348,6 @@ class ClientUI(tk.Frame):
         text = user_input.widget.get('1.0', 'end-1c')
         self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
         user_input.widget.delete('1.0', tk.END)
-        self.send_command_with_preferences(text)
-
-    def send_command_with_preferences(self, text):
         if not self.interrupt_input:
             self.send_command(text)
         else:
