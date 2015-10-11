@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import traceback
@@ -9,6 +10,8 @@ class PluginManager():
     path = "plugin_manager/plugins"
 
     def __init__(self, send_command, echo):
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.DEBUG)
         self.send_command = send_command
         self.echo = echo
 
@@ -37,7 +40,7 @@ class PluginManager():
                             self.plugin_enabled[name] = True
                             self.register_apis(name, self.plugins[name])
                     except Exception as e:
-                        print(traceback.format_exc())
+                        self.log.error(traceback.format_exc())
         sys.path.pop(0)
 
     def register_apis(self, name, mod):
@@ -74,8 +77,8 @@ class PluginManager():
                 try:
                     self.plugins[name].pre_process(line)
                 except Exception:
-                    print(name + " Failure")
-                    print(traceback.format_exc())
+                    self.log.error(name + " Failure")
+                    self.log.error(traceback.format_exc())
 
         # Maybe we do something like AND the result of all the process calls?
         # if any of them return that they handled it and we should not draw?
@@ -87,8 +90,8 @@ class PluginManager():
                 try:
                     self.plugins[name].post_process(line)
                 except Exception:
-                    print(name + " Failure")
-                    print(traceback.format_exc())
+                    self.log.error(name + " Failure")
+                    self.log.error(traceback.format_exc())
 
     ### Plugin UI Handling
     def create_plugin_area(self, plugin_area):
@@ -97,8 +100,8 @@ class PluginManager():
                 try:
                     self.plugins[name].draw(plugin_area)
                 except Exception:
-                    print(name + " Failure")
-                    print(traceback.format_exc())
+                    self.log.error(name + " Failure")
+                    self.log.error(traceback.format_exc())
 
     ### Status Update API
     def create_status_api(self):
@@ -113,5 +116,5 @@ class PluginManager():
                     update_method = getattr(self.plugins[name], self.status_plugins_api_names[status])
                     update_method(value)
                 except Exception:
-                    print(name + " Failure")
-                    print(traceback.format_exc())
+                    self.log.error(name + " Failure")
+                    self.log.error(traceback.format_exc())

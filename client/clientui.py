@@ -4,7 +4,7 @@ import re
 from collections import deque
 import html.parser
 from math import floor
-from pprint import pprint
+import traceback
 
 from preferences.preferences import Preferences
 from plugin_manager.plugin_manager import PluginManager
@@ -152,7 +152,7 @@ class ClientUI(tk.Frame):
                 exit_elements = [exit_update[x:x + 4] for x in range(0, len(exit_update), 4)]
                 self.update_exits(exit_elements)
             else:
-                pprint(skoot)
+                self.log.error(skoot)
 
     def draw_output(self, text, tags=None):
         self.plugin_manager.pre_process(text, tags)
@@ -160,8 +160,8 @@ class ClientUI(tk.Frame):
         # scroll_position = self.output_panel.scrollbar.get()
         try:
             self.output_panel.insert(tk.END, text, tags)
-        except Exception as e:
-            print(e)
+        except Exception:
+            self.log.error(traceback.format_exc())
         self.output_panel.configure(state="disabled")
         self.scroll_output()
         self.plugin_manager.post_process(text, tags)
@@ -322,9 +322,8 @@ class ClientUI(tk.Frame):
                 y = int(position[1]) + self.MAP_OFFSET + size
                 self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
             else:
-                print("Length: " + str(len(position)))
-                print("Bad map position: " + str(position))
-                print("In the scoot: " + str(map_elements))
+                self.log.error("Bad map position: " + str(position))
+                self.log.error("In the scoot: " + str(map_elements))
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
