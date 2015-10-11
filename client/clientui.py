@@ -4,7 +4,6 @@ import re
 from collections import deque
 import html.parser
 from math import floor
-from pprint import pprint
 
 from preferences.preferences import Preferences
 
@@ -62,7 +61,6 @@ class ClientUI(tk.Frame):
             # Before we nuke the HTML closing tags, decide if we need to un-nest some lists.
             if self.list_depth > 0:
                 self.list_depth -= line.count('</ul>')
-                # pprint('List depth now lowered to: ' + str(self.list_depth))
             line = re.sub(r"</.*?>", "", line)
             tags = []
             self.draw_output("\n")
@@ -70,7 +68,6 @@ class ClientUI(tk.Frame):
             # line is now a string with HTML opening tags.
             # Each tag should delineate segment of the string so that if removed the resulting string
             # would be the output line.
-
             # It can be a subset of (antiquated) HTML tags:
             # center, font, hr, ul, li, pre, b
             pattern = re.compile(r'<(.*?)>')
@@ -82,6 +79,8 @@ class ClientUI(tk.Frame):
                     if re.search(r'thinks aloud:', segment):
                         # Just a thought, print it!
                         self.draw_output('<' + segment + '>', tuple(tags))
+                    elif re.search(r'xch_page', segment):
+                        pass  # @todo Actually clear the output buffer?
                     elif re.match(r'font', segment):
                         # Handle font changes
                         # So far I know of size and color attributes.
@@ -119,7 +118,10 @@ class ClientUI(tk.Frame):
                         # Not a special segment
                         self.draw_output(segment, tuple(tags))
             else:
-                self.draw_output(line, None)
+                # We're always going to see this with a Zealotry login. The users don't need to know that
+                # though so just suppress it.
+                if line.find('Either that user does not exist or has a different password.') < 0:
+                    self.draw_output(line, None)
 
     def draw_tabs(self):
         tabs = ""
@@ -145,8 +147,6 @@ class ClientUI(tk.Frame):
                 exit_update = skoot_search.group(2).split(',')
                 exit_elements = [exit_update[x:x + 4] for x in range(0, len(exit_update), 4)]
                 self.update_exits(exit_elements)
-            else:
-                pprint(skoot)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
