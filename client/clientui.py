@@ -38,10 +38,8 @@ class ClientUI(tk.Frame):
         self.status = dict()
         self.create_widgets()
 
-        # pprint(vars(master))
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
-        # self.output_panel = self.output_frame.children['output']
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
