@@ -1,16 +1,18 @@
 #!/usr/bin/env python
-from plugin_manager.plugin_manager import PluginManager
 from socket import socket
 from queue import Queue
 from time import sleep
 from threading import Thread
-from .clientui import ClientUI
 from configparser import ConfigParser
 import logging
 import time
-import requests
 import re
+
 import hashlib
+
+import requests
+
+from .clientui import ClientUI
 
 __author__ = 'ToothlessRebel'
 
@@ -26,8 +28,7 @@ class Client:
         self.config = ConfigParser()
         if self.config.read('config.ini').__len__() < 1:
             raise EnvironmentError
-        self.plugin_manager = PluginManager()
-        self.ui = ClientUI(master, self, self.queue, self.send, self.plugin_manager)
+        self.ui = ClientUI(master, self, self.queue, self.send)
         self.socket = socket()
         self.listener = None
         self.session_log_name = time.strftime("%d.%m.%Y-%H.%M.%S.txt")

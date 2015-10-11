@@ -1,5 +1,6 @@
 import os
 import sys
+import traceback
 
 __author__ = 'pat'
 
@@ -7,7 +8,10 @@ __author__ = 'pat'
 class PluginManager():
     path = "plugin_manager/plugins"
 
-    def __init__(self):
+    def __init__(self, send_command, echo):
+        self.send_command = send_command
+        self.echo = echo
+
         self.plugins = {}
         self.plugin_enabled = {}
 
@@ -20,9 +24,6 @@ class PluginManager():
             for d in dirs:
                 self.find_plugins(self.path + "/" + d)
 
-        self.send_command = None
-        self.echo = None
-
     def find_plugins(self, current_path):
         sys.path.insert(0, current_path)
         for root, dirs, files in os.walk(current_path, topdown=True):
@@ -34,12 +35,17 @@ class PluginManager():
                         if hasattr(mod, "Plugin"):
                             self.plugins[name] = mod.Plugin()
                             self.plugin_enabled[name] = True
-                            self.register_apis(name, mod)
+                            self.register_apis(name, self.plugins[name])
                     except Exception as e:
-                        pass
+                        print(traceback.format_exc())
         sys.path.pop(0)
 
     def register_apis(self, name, mod):
+        if hasattr(mod, "set_send_command"):
+            mod.set_send_command(self.send_command)
+        if hasattr(mod, "set_echo"):
+            mod.set_echo(self.echo)
+
         if hasattr(mod, "pre_process"):
             self.pre_process_plugins.append(name)
         if hasattr(mod, "post_process"):
@@ -61,16 +67,15 @@ class PluginManager():
     def toggle_plugin(self, name, is_enabled):
         self.plugin_enabled[name] = is_enabled
 
-    def setup(self, send_command, echo):
-        self.send_command = send_command
-        self.echo = echo
-
-
     ### Line Processing
     def pre_process(self, line, tags):
         for name in self.pre_process_plugins:
             if self.plugin_enabled[name]:
-                self.plugins[name].pre_process(line, self.send_command, self.echo)
+                try:
+                    self.plugins[name].pre_process(line)
+                except Exception:
+                    print(name + " Failure")
+                    print(traceback.format_exc())
 
         # Maybe we do something like AND the result of all the process calls?
         # if any of them return that they handled it and we should not draw?
@@ -79,14 +84,21 @@ class PluginManager():
     def post_process(self, line, tags):
         for name in self.post_process_plugins:
             if self.plugin_enabled[name]:
-                self.plugins[name].post_process(line, self.send_command, self.echo)
-
+                try:
+                    self.plugins[name].post_process(line)
+                except Exception:
+                    print(name + " Failure")
+                    print(traceback.format_exc())
 
     ### Plugin UI Handling
     def create_plugin_area(self, plugin_area):
         for name in self.ui_plugins:
             if self.plugin_enabled[name]:
-                self.plugins[name].draw(plugin_area)
+                try:
+                    self.plugins[name].draw(plugin_area)
+                except Exception:
+                    print(name + " Failure")
+                    print(traceback.format_exc())
 
     ### Status Update API
     def create_status_api(self):
@@ -97,6 +109,9 @@ class PluginManager():
     def status_update(self, status, value):
         for name in self.status_plugins[status]:
             if self.plugin_enabled[name]:
-                update_method = getattr(self.plugins[name], self.status_plugins_api_names[status])
-                update_method(value)
-
+                try:
+                    update_method = getattr(self.plugins[name], self.status_plugins_api_names[status])
+                    update_method(value)
+                except Exception:
+                    print(name + " Failure")
+                    print(traceback.format_exc())

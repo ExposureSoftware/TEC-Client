@@ -1,7 +1,7 @@
 __author__ = 'ToothlessRebel'
-import sys
 from setuptools import find_packages
 from pkg_resources import resource_filename
+
 from cx_Freeze import setup, Executable
 
 build_exe_options = {

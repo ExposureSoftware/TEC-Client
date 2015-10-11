@@ -7,19 +7,19 @@ from math import floor
 from pprint import pprint
 
 from preferences.preferences import Preferences
+from plugin_manager.plugin_manager import PluginManager
 
 __author__ = 'ToothlessRebel'
 
 
 class ClientUI(tk.Frame):
-    def __init__(self, master, client, queue, send_command, plugin_manager):
+    def __init__(self, master, client, queue, send_command):
         super(ClientUI, self).__init__()
         self.client = client
         self.queue = queue
         self.send_command = send_command
         self.master = master
-        self.plugin_manager = plugin_manager
-        self.plugin_manager.setup(self.send_command_with_prefs, self.echo)
+        self.plugin_manager = PluginManager(self.send_command_with_prefs, self.echo)
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
@@ -44,7 +44,6 @@ class ClientUI(tk.Frame):
         self.status = dict()
         self.create_widgets()
 
-        # pprint(vars(master))
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
         self.input = master.children['input']
@@ -317,10 +316,15 @@ class ClientUI(tk.Frame):
     def update_map(self, map_elements):
         self.map_area.delete("all")
         for position in map_elements:
-            size = int(position[2])
-            x = int(position[0]) + self.MAP_OFFSET
-            y = int(position[1]) + self.MAP_OFFSET + size
-            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+            if len(position) > 4:
+                size = int(position[2])
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET + size
+                self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+            else:
+                print("Length: " + str(len(position)))
+                print("Bad map position: " + str(position))
+                print("In the scoot: " + str(map_elements))
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
@@ -366,7 +370,6 @@ class ClientUI(tk.Frame):
     def echo(self, text):
         self.draw_output(("\n" + text), 'italic')
         self.scroll_output()
-
 
     def show_preferences(self):
         prefs = Preferences(self.client)
