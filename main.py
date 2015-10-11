@@ -3,7 +3,6 @@ from client import Client
 from pkg_resources import resource_filename
 import faulthandler
 import platform
-from pprint import pprint
 
 __author__ = 'ToothlessRebel'
 
