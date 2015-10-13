@@ -213,6 +213,7 @@ class ClientUI(tk.Frame):
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
+        self.create_macro_area(side_bar)
 
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
@@ -255,8 +256,8 @@ class ClientUI(tk.Frame):
         self.compass['e'] = self.compass_area.create_rectangle(55, 30, 75, 50, fill="grey", tags="e")
 
         self.compass['sw'] = self.compass_area.create_rectangle(5, 55, 25, 75, fill="grey", tags="sw")
-        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="sw")
-        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="sw")
+        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="s")
+        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="se")
 
         self.compass_area.pack(side='bottom')
 
@@ -311,6 +312,36 @@ class ClientUI(tk.Frame):
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
         self.map_area.pack(side='bottom')
+
+    def create_macro_area(self, side_bar):
+
+        macros = tk.Frame(side_bar, name="macros", width=120, height=120, bg='black')
+
+        tk.Button(macros, text='I', command=lambda: self.send_command("fe1")).grid(row=0, column=0, sticky='WENS')
+        tk.Button(macros, text='II', command=lambda: self.send_command("fe2")).grid(row=0, column=1, sticky='WENS')
+        tk.Button(macros, text='III', command=lambda: self.send_command("fe3")).grid(row=0, column=2, sticky='WENS')
+        tk.Button(macros, text='IV', command=lambda: self.send_command("fe4")).grid(row=0, column=3, sticky='WENS')
+        tk.Button(macros, text='V', command=lambda: self.send_command("fe5")).grid(row=0, column=4, sticky='WENS')
+
+        tk.Button(macros, text='VI', command=lambda: self.send_command("fe6")).grid(row=1, column=0, sticky='WENS')
+        tk.Button(macros, text='VII', command=lambda: self.send_command("fe7")).grid(row=1, column=1, sticky='WENS')
+        tk.Button(macros, text='VIII', command=lambda: self.send_command("fe8")).grid(row=1, column=2, sticky='WENS')
+        tk.Button(macros, text='IX', command=lambda: self.send_command("fe9")).grid(row=1, column=3, sticky='WENS')
+        tk.Button(macros, text='X', command=lambda: self.send_command("fe10")).grid(row=1, column=4, sticky='WENS')
+
+        tk.Button(macros, text='XI', command=lambda: self.send_command("fe11")).grid(row=2, column=0, sticky='WENS')
+        tk.Button(macros, text='XII', command=lambda: self.send_command("fe12")).grid(row=2, column=1, sticky='WENS')
+        tk.Button(macros, text='XIII', command=lambda: self.send_command("fe13")).grid(row=2, column=2, sticky='WENS')
+        tk.Button(macros, text='XIV', command=lambda: self.send_command("fe14")).grid(row=2, column=3, sticky='WENS')
+        tk.Button(macros, text='XV', command=lambda: self.send_command("fe15")).grid(row=2, column=4, sticky='WENS')
+
+        tk.Button(macros, text='XVI', command=lambda: self.send_command("fe16")).grid(row=3, column=0, sticky='WENS')
+        tk.Button(macros, text='XVII', command=lambda: self.send_command("fe17")).grid(row=3, column=1, sticky='WENS')
+        tk.Button(macros, text='XVIII', command=lambda: self.send_command("fe18")).grid(row=3, column=2, sticky='WENS')
+        tk.Button(macros, text='XIX', command=lambda: self.send_command("fe19")).grid(row=3, column=3, sticky='WENS')
+        tk.Button(macros, text='XX', command=lambda: self.send_command("fe20")).grid(row=3, column=4, sticky='WENS')
+
+        macros.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
