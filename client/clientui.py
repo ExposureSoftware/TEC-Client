@@ -207,7 +207,10 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+
         self.create_status_area(side_bar)
+        self.status_area.bind("<Button-1>", lambda command: self.send_command("condition"))
+
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
 
