@@ -335,12 +335,6 @@ class ClientUI(tk.Frame):
         tk.Button(macros, text='XIV', command=lambda: self.send_command("fe14")).grid(row=2, column=3, sticky='WENS')
         tk.Button(macros, text='XV', command=lambda: self.send_command("fe15")).grid(row=2, column=4, sticky='WENS')
 
-        tk.Button(macros, text='XVI', command=lambda: self.send_command("fe16")).grid(row=3, column=0, sticky='WENS')
-        tk.Button(macros, text='XVII', command=lambda: self.send_command("fe17")).grid(row=3, column=1, sticky='WENS')
-        tk.Button(macros, text='XVIII', command=lambda: self.send_command("fe18")).grid(row=3, column=2, sticky='WENS')
-        tk.Button(macros, text='XIX', command=lambda: self.send_command("fe19")).grid(row=3, column=3, sticky='WENS')
-        tk.Button(macros, text='XX', command=lambda: self.send_command("fe20")).grid(row=3, column=4, sticky='WENS')
-
         macros.pack(side='bottom')
 
     def traverse_up_input_buffer(self, event):
