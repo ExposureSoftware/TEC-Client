@@ -1,4 +1,6 @@
 from tkinter.font import Font
+import math
+from pkg_resources import resource_filename
 import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
@@ -147,6 +149,14 @@ class ClientUI(tk.Frame):
                 exit_update = skoot_search.group(2).split(',')
                 exit_elements = [exit_update[x:x + 4] for x in range(0, len(exit_update), 4)]
                 self.update_exits(exit_elements)
+            elif skoot_number == '9':
+                brightness = math.floor(float(skoot_search.group(2)))
+                self.update_lighting(brightness)
+
+    def update_lighting(self, brightness):
+        brightness = str('{:x}'.format(brightness))
+        rgb = '#' + brightness + brightness + brightness
+        self.compass_area.configure(bg=rgb)
 
     def draw_output(self, text, tags=None):
         self.output_panel.configure(state="normal")
@@ -240,15 +250,21 @@ class ClientUI(tk.Frame):
                 self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
 
     def create_compass_area(self, side_bar):
+
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
+        self.compass_area.background = tk.PhotoImage(file=resource_filename('resources.images', 'compass_bg.gif'))
+        self.compass_area.create_image(0, 0, image=self.compass_area.background, anchor=tk.NW)
+
         self.compass = dict()
         self.compass['nw'] = self.compass_area.create_rectangle(5, 5, 25, 25, fill="grey", tags="nw")
         self.compass['n'] = self.compass_area.create_rectangle(30, 5, 50, 25, fill="grey", tags="n")
         self.compass['ne'] = self.compass_area.create_rectangle(55, 5, 75, 25, fill="grey", tags="ne")
 
         self.compass['w'] = self.compass_area.create_rectangle(5, 30, 25, 50, fill="grey", tags="w")
-        self.compass['u'] = self.compass_area.create_polygon([30, 30, 48, 30, 30, 48], fill="grey", tags="u")
-        self.compass['d'] = self.compass_area.create_polygon([50, 32, 50, 50, 32, 50], fill="grey", tags="d")
+        self.compass['u'] = self.compass_area.create_polygon([30, 30, 48, 30, 30, 48], fill="grey", tags="u",
+                                                             outline='black')
+        self.compass['d'] = self.compass_area.create_polygon([50, 32, 50, 50, 32, 50], fill="grey", tags="d",
+                                                             outline='black')
         self.compass['e'] = self.compass_area.create_rectangle(55, 30, 75, 50, fill="grey", tags="e")
 
         self.compass['sw'] = self.compass_area.create_rectangle(5, 55, 25, 75, fill="grey", tags="sw")
@@ -341,5 +357,3 @@ class ClientUI(tk.Frame):
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
-
-
