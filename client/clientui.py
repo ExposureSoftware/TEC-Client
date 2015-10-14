@@ -1,6 +1,5 @@
 from tkinter.font import Font
 import math
-from pkg_resources import resource_filename
 import tkinter as tk  # @todo Import only what's needed.
 import re
 from collections import deque
