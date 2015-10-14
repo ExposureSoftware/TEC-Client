@@ -39,6 +39,8 @@ class ClientUI(tk.Frame):
 
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
+        self.output_panel.configure(state="normal")
+        self.output_panel.bind('<Key>',lambda e: 'break')
         self.input = master.children['input']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
@@ -68,6 +70,7 @@ class ClientUI(tk.Frame):
             # line is now a string with HTML opening tags.
             # Each tag should delineate segment of the string so that if removed the resulting string
             # would be the output line.
+
             # It can be a subset of (antiquated) HTML tags:
             # center, font, hr, ul, li, pre, b
             pattern = re.compile(r'<(.*?)>')
@@ -149,10 +152,7 @@ class ClientUI(tk.Frame):
                 self.update_exits(exit_elements)
 
     def draw_output(self, text, tags=None):
-        self.output_panel.configure(state="normal")
-        # scroll_position = self.output_panel.scrollbar.get()
         self.output_panel.insert(tk.END, text, tags)
-        self.output_panel.configure(state="disabled")
         self.scroll_output()
 
         # If we're logging the session, we need to handle that
