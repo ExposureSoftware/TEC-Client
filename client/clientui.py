@@ -252,8 +252,6 @@ class ClientUI(tk.Frame):
     def create_compass_area(self, side_bar):
 
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
-        self.compass_area.background = tk.PhotoImage(file=resource_filename('resources.images', 'compass_bg.gif'))
-        self.compass_area.create_image(0, 0, image=self.compass_area.background, anchor=tk.NW)
 
         self.compass = dict()
         self.compass['nw'] = self.compass_area.create_rectangle(5, 5, 25, 25, fill="grey", tags="nw")
