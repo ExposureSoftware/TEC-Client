@@ -30,7 +30,7 @@ setup(
         Executable(
             "main.py",
             base=base,
-            icon=resource_filename('resources.images', 'eternal_logo.ico'),
+            icon=resource_filename('resources.images', 'centurion.ico'),
             targetName="Centurion Client.exe",
             packages=find_packages()
         )
