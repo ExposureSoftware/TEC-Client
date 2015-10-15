@@ -8,7 +8,8 @@ __author__ = 'ToothlessRebel'
 build_exe_options = {
     "include_files": [
         ('resources', 'resources'),
-        ('config.ini', 'config.ini')
+        ('config.ini', 'config.ini'),
+        'plugins'
     ]
 }
 
@@ -16,7 +17,7 @@ base = None
 
 setup(
     name="Centurion Client",
-    version="0.5.2-alpha",
+    version="0.5.3-alpha",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options

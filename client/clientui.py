@@ -6,8 +6,8 @@ from collections import deque
 import html.parser
 from math import floor
 from notes import Notes
-
 from preferences.preferences import Preferences
+from plugin_manager.plugin_manager import PluginManager
 
 __author__ = 'ToothlessRebel'
 
@@ -19,11 +19,13 @@ class ClientUI(tk.Frame):
         self.queue = queue
         self.send_command = send_command
         self.master = master
+        self.plugin_manager = PluginManager(self.send_command_with_prefs, self.echo)
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
         self.input_cursor = 0
         self.list_depth = 0
+        self.MAP_OFFSET = 60
 
         menu_bar = tk.Menu(master)
         self.menu_file = tk.Menu(menu_bar, tearoff=0)
@@ -31,6 +33,9 @@ class ClientUI(tk.Frame):
         self.menu_file.add_command(label="Disconnect", command=self.client.shutdown)
         self.menu_file.add_command(label="Quit", command=self.client.quit)
         menu_bar.add_cascade(label="Client", menu=self.menu_file)
+
+        self.create_plugin_menu(menu_bar)
+
         self.master.config(menu=menu_bar)
 
         self.master.grid()
@@ -41,6 +46,8 @@ class ClientUI(tk.Frame):
 
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
+        self.output_panel.configure(state="normal")
+        self.output_panel.bind('<Key>', lambda e: 'break')
         self.input = master.children['input']
         self.context_menu = master.children['context_menu']
 
@@ -71,6 +78,7 @@ class ClientUI(tk.Frame):
             # line is now a string with HTML opening tags.
             # Each tag should delineate segment of the string so that if removed the resulting string
             # would be the output line.
+
             # It can be a subset of (antiquated) HTML tags:
             # center, font, hr, ul, li, pre, b
             pattern = re.compile(r'<(.*?)>')
@@ -160,11 +168,10 @@ class ClientUI(tk.Frame):
         self.compass_area.configure(bg=rgb)
 
     def draw_output(self, text, tags=None):
-        self.output_panel.configure(state="normal")
-        # scroll_position = self.output_panel.scrollbar.get()
+        self.plugin_manager.pre_process(text, tags)
         self.output_panel.insert(tk.END, text, tags)
-        self.output_panel.configure(state="disabled")
         self.scroll_output()
+        self.plugin_manager.post_process(text, tags)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
@@ -193,7 +200,6 @@ class ClientUI(tk.Frame):
 
         output = tk.Text(
             output_frame,
-            state=tk.DISABLED,
             name="output",
             yscrollcommand=scrollbar.set,
             wrap=tk.WORD
@@ -223,6 +229,10 @@ class ClientUI(tk.Frame):
 
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
+        self.create_macro_area(side_bar)
+
+        # This is the area for plugins
+        self.create_plugin_area()
 
         # Build a context menu for the output pane.
         context_menu = tk.Menu(self.master, tearoff=0, name="context_menu")
@@ -270,6 +280,8 @@ class ClientUI(tk.Frame):
             elif status_update[0] == 'Satiation':
                 self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
 
+            self.plugin_manager.status_update(status_update[0], status_update[1])
+
     def create_compass_area(self, side_bar):
 
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
@@ -287,8 +299,8 @@ class ClientUI(tk.Frame):
         self.compass['e'] = self.compass_area.create_rectangle(55, 30, 75, 50, fill="grey", tags="e")
 
         self.compass['sw'] = self.compass_area.create_rectangle(5, 55, 25, 75, fill="grey", tags="sw")
-        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="sw")
-        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="sw")
+        self.compass['s'] = self.compass_area.create_rectangle(30, 55, 50, 75, fill="grey", tags="s")
+        self.compass['se'] = self.compass_area.create_rectangle(55, 55, 75, 75, fill="grey", tags="se")
 
         self.compass_area.pack(side='bottom')
 
@@ -303,6 +315,14 @@ class ClientUI(tk.Frame):
 
     def update_exits(self, connections):
         for position in connections:
+            if len(position) == 4:
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET
+                color = "white" if position[3] == "1" else "black"
+                coords = self.compute_exit_line(x, y, position[2])
+                self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=2)
+                self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
+                self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
             x = int(position[0]) + 60
             y = int(position[1]) + 60
             color = "white" if position[3] == "1" else "black"
@@ -318,33 +338,63 @@ class ClientUI(tk.Frame):
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
     def compute_exit_line(x, y, direction):
         if direction == "ver":
-            return [[x - 2, y + 5, x - 2, y - 5],
+            return [[x - 1, y + 5, x - 1, y - 5],
                     [x, y + 5, x, y - 5],
-                    [x + 2, y + 5, x + 2, y - 5]]
+                    [x + 1, y + 5, x + 1, y - 5]]
         elif direction == "hor":
-            return [[x + 5, y - 2, x - 5, y - 2],
+            return [[x + 5, y - 1, x - 5, y - 1],
                     [x + 5, y, x - 5, y],
-                    [x + 5, y + 2, x - 5, y + 2]]
+                    [x + 5, y + 1, x - 5, y + 1]]
         elif direction == "ne" or direction == "sw":
             return [[x - 3, y + 4, x + 3, y - 4],
                     [x - 3, y + 3, x + 3, y - 3],
-                    [x - 3, y + 2, x + 3, y - 2]]
+                    [x - 3, y + 1, x + 3, y - 1]]
         elif direction == "nw" or direction == "se":
             return [[x - 3, y - 4, x + 3, y + 4],
                     [x - 3, y - 3, x + 3, y + 3],
-                    [x - 3, y - 2, x + 3, y + 2]]
+                    [x - 3, y - 1, x + 3, y + 1]]
 
     def update_map(self, map_elements):
         self.map_area.delete("all")
         for position in map_elements:
-            size = int(position[2])
-            x = int(position[0]) + 60
-            y = int(position[1]) + 60 + size
-            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+            if len(position) > 4:
+                size = int(position[2])
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET + size
+                self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
         self.map_area.pack(side='bottom')
+
+    def create_macro_area(self, side_bar):
+
+        macros = tk.Frame(side_bar, name="macros", width=120, height=120, bg='black')
+
+        tk.Button(macros, text='I', command=lambda: self.send_command("fe1")).grid(row=0, column=0, sticky='WENS')
+        tk.Button(macros, text='II', command=lambda: self.send_command("fe2")).grid(row=0, column=1, sticky='WENS')
+        tk.Button(macros, text='III', command=lambda: self.send_command("fe3")).grid(row=0, column=2, sticky='WENS')
+        tk.Button(macros, text='IV', command=lambda: self.send_command("fe4")).grid(row=0, column=3, sticky='WENS')
+        tk.Button(macros, text='V', command=lambda: self.send_command("fe5")).grid(row=0, column=4, sticky='WENS')
+
+        tk.Button(macros, text='VI', command=lambda: self.send_command("fe6")).grid(row=1, column=0, sticky='WENS')
+        tk.Button(macros, text='VII', command=lambda: self.send_command("fe7")).grid(row=1, column=1, sticky='WENS')
+        tk.Button(macros, text='VIII', command=lambda: self.send_command("fe8")).grid(row=1, column=2, sticky='WENS')
+        tk.Button(macros, text='IX', command=lambda: self.send_command("fe9")).grid(row=1, column=3, sticky='WENS')
+        tk.Button(macros, text='X', command=lambda: self.send_command("fe10")).grid(row=1, column=4, sticky='WENS')
+
+        tk.Button(macros, text='XI', command=lambda: self.send_command("fe11")).grid(row=2, column=0, sticky='WENS')
+        tk.Button(macros, text='XII', command=lambda: self.send_command("fe12")).grid(row=2, column=1, sticky='WENS')
+        tk.Button(macros, text='XIII', command=lambda: self.send_command("fe13")).grid(row=2, column=2, sticky='WENS')
+        tk.Button(macros, text='XIV', command=lambda: self.send_command("fe14")).grid(row=2, column=3, sticky='WENS')
+        tk.Button(macros, text='XV', command=lambda: self.send_command("fe15")).grid(row=2, column=4, sticky='WENS')
+
+        macros.pack(side='bottom')
+
+    def create_plugin_area(self):
+        plugin_bar = tk.Frame(name="plugin_bar")
+        plugin_bar.grid(row=0, column=4, rowspan=1, sticky=tk.S + tk.N)
+        self.plugin_manager.create_plugin_area(plugin_bar)
 
     def traverse_up_input_buffer(self, event):
         if self.input_cursor < self.input_buffer.__len__():
@@ -366,16 +416,42 @@ class ClientUI(tk.Frame):
         text = user_input.widget.get('1.0', 'end-1c')
         self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
         user_input.widget.delete('1.0', tk.END)
+        self.send_command_with_prefs(text)
+        return 'break'
+
+    def send_command_with_prefs(self, text):
         if not self.interrupt_input:
             self.send_command(text)
         else:
             self.interrupt_buffer.append(text)
-        if self.client.config['UI'].getboolean('echo_input'):
-            self.draw_output(("\n" + text), 'italic')
-            self.scroll_output()
 
-        return 'break'
+        if self.client.config['UI'].getboolean('echo_input'):
+            self.echo(text)
+
+    def echo(self, text):
+        self.draw_output(("\n" + text), 'italic')
+        self.scroll_output()
 
     def show_preferences(self):
         prefs = Preferences(self.client)
         prefs.grid()
+
+    def create_plugin_menu(self, menu_bar):
+        size = len(menu_bar.children)
+        if size > 1:
+            menu_bar.delete("Plugins")
+        self.menu_plugins = tk.Menu(menu_bar, tearoff=0)
+        self.plugin_checkboxes = dict()
+        for plugin in self.plugin_manager.plugins:
+            self.plugin_checkboxes[plugin] = tk.BooleanVar(value=self.plugin_manager.plugin_enabled[plugin])
+            self.menu_plugins.add_checkbutton(label=plugin, var=self.plugin_checkboxes[plugin],
+                                              command=lambda name=plugin: self.toggle_plugin(name,
+                                                                                             self.plugin_checkboxes[
+                                                                                                 name].get()))
+        self.menu_plugins.add_command(label="Refresh", command=lambda mb=menu_bar: self.create_plugin_menu(menu_bar))
+
+        menu_bar.add_cascade(label="Plugins", menu=self.menu_plugins)
+
+    def toggle_plugin(self, name, toggle_on):
+        self.plugin_manager.toggle_plugin(name, toggle_on)
+        self.create_plugin_area()

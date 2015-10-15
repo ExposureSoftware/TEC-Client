@@ -3,13 +3,16 @@ from socket import socket
 from queue import Queue
 from time import sleep
 from threading import Thread
-from .clientui import ClientUI
 from configparser import ConfigParser
 import logging
 import time
-import requests
 import re
+
 import hashlib
+
+import requests
+
+from .clientui import ClientUI
 
 __author__ = 'ToothlessRebel'
 
