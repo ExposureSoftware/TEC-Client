@@ -318,9 +318,6 @@ class ClientUI(tk.Frame):
                 x = int(position[0]) + self.MAP_OFFSET
                 y = int(position[1]) + self.MAP_OFFSET + size
                 self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
-            else:
-                self.log.error("Bad map position: " + str(position))
-                self.log.error("In the scoot: " + str(map_elements))
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
