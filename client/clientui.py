@@ -4,19 +4,21 @@ import re
 from collections import deque
 import html.parser
 from math import floor
+
 from preferences.preferences import Preferences
+from plugin_manager.plugin_manager import PluginManager
 
 __author__ = 'ToothlessRebel'
 
 
 class ClientUI(tk.Frame):
-    def __init__(self, master, client, queue, send_command, plugin_manager):
+    def __init__(self, master, client, queue, send_command):
         super(ClientUI, self).__init__()
         self.client = client
         self.queue = queue
         self.send_command = send_command
         self.master = master
-        self.plugin_manager = plugin_manager
+        self.plugin_manager = PluginManager(self.send_command_with_prefs, self.echo)
         self.interrupt_input = False
         self.interrupt_buffer = deque()
         self.input_buffer = []
@@ -156,12 +158,10 @@ class ClientUI(tk.Frame):
                 self.update_exits(exit_elements)
 
     def draw_output(self, text, tags=None):
-        text_handled = self.plugin_manager.pre_draw_plugins(text,tags)
-        if not text_handled:
-            # scroll_position = self.output_panel.scrollbar.get()
-            self.output_panel.insert(tk.END, text, tags)
-            self.scroll_output()
-        self.plugin_manager.post_draw_plugin(text,tags)
+        self.plugin_manager.pre_process(text, tags)
+        self.output_panel.insert(tk.END, text, tags)
+        self.scroll_output()
+        self.plugin_manager.post_process(text, tags)
 
         # If we're logging the session, we need to handle that
         if self.client.config['logging'].getboolean('log_session'):
@@ -214,19 +214,13 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
-        self.MAP_OFFSET = 60
         self.create_status_area(side_bar)
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
         self.create_macro_area(side_bar)
-
+        
         # This is the area for plugins
         self.create_plugin_area()
-
-        # This is the side bar configuration.
-        plugin_bar = tk.Frame(name="plugin_bar")
-        plugin_bar.grid(row=0, column=4, rowspan=2, sticky=tk.S + tk.N)
-        self.plugin_manager.create_plugin_area(plugin_bar)
 
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
@@ -255,6 +249,8 @@ class ClientUI(tk.Frame):
                 self.status_area.coords(self.status['encumbrance'], 35, 105 - int(status_update[1]), 45, 105)
             elif status_update[0] == 'Satiation':
                 self.status_area.coords(self.status['satiation'], 50, 105 - int(status_update[1]), 60, 105)
+
+            self.plugin_manager.status_update(status_update[0], status_update[1])
 
     def create_compass_area(self, side_bar):
         self.compass_area = tk.Canvas(side_bar, name="compass", width=78, height=78, bg='black')
@@ -317,10 +313,11 @@ class ClientUI(tk.Frame):
     def update_map(self, map_elements):
         self.map_area.delete("all")
         for position in map_elements:
-            size = int(position[2])
-            x = int(position[0]) + self.MAP_OFFSET
-            y = int(position[1]) + self.MAP_OFFSET + size
-            self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
+            if len(position) > 4:
+                size = int(position[2])
+                x = int(position[0]) + self.MAP_OFFSET
+                y = int(position[1]) + self.MAP_OFFSET + size
+                self.map_area.create_rectangle(x, y, x + size, y - size, fill=position[3])
 
     def create_map_area(self, side_bar):
         self.map_area = tk.Canvas(side_bar, name="map", width=120, height=120, bg='black')
@@ -375,15 +372,21 @@ class ClientUI(tk.Frame):
         text = user_input.widget.get('1.0', 'end-1c')
         self.input_buffer.append(user_input.widget.get('1.0', 'end-1c'))
         user_input.widget.delete('1.0', tk.END)
+        self.send_command_with_prefs(text)
+        return 'break'
+
+    def send_command_with_prefs(self, text):
         if not self.interrupt_input:
             self.send_command(text)
         else:
             self.interrupt_buffer.append(text)
-        if self.client.config['UI'].getboolean('echo_input'):
-            self.draw_output(("\n" + text), 'italic')
-            self.scroll_output()
 
-        return 'break'
+        if self.client.config['UI'].getboolean('echo_input'):
+            self.echo(text)
+
+    def echo(self, text):
+        self.draw_output(("\n" + text), 'italic')
+        self.scroll_output()
 
     def show_preferences(self):
         prefs = Preferences(self.client)
@@ -396,7 +399,7 @@ class ClientUI(tk.Frame):
         self.menu_plugins = tk.Menu(menu_bar, tearoff=0)
         self.plugin_checkboxes = dict()
         for plugin in self.plugin_manager.plugins:
-            self.plugin_checkboxes[plugin] = tk.BooleanVar(value=self.plugin_manager.plugin_status[plugin])
+            self.plugin_checkboxes[plugin] = tk.BooleanVar(value=self.plugin_manager.plugin_enabled[plugin])
             self.menu_plugins.add_checkbutton(label=plugin, var=self.plugin_checkboxes[plugin],
                                               command=lambda name=plugin: self.toggle_plugin(name,
                                                                                              self.plugin_checkboxes[

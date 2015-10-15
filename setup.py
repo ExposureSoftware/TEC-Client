@@ -8,7 +8,8 @@ __author__ = 'ToothlessRebel'
 build_exe_options = {
     "include_files": [
         ('resources', 'resources'),
-        ('config.ini', 'config.ini')
+        ('config.ini', 'config.ini'),
+        'plugins'
     ]
 }
 
