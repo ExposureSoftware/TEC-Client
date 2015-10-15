@@ -7,7 +7,7 @@ __author__ = 'pat'
 
 
 class PluginManager():
-    path = "plugin_manager/plugins"
+    path = "plugins"
 
     def __init__(self, send_command, echo):
         self.log = logging.getLogger(__name__)

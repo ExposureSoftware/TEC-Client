@@ -7,13 +7,14 @@ from cx_Freeze import setup, Executable
 build_exe_options = {
     "include_files": [
         ('resources', 'resources'),
-        ('config.ini', 'config.ini')
+        ('config.ini', 'config.ini'),
+        'plugins'
     ]
 }
 
 base = None
 # if sys.platform == "win32":
-#     base = "Win32GUI"
+# base = "Win32GUI"
 
 setup(
     name="TEC Client",
