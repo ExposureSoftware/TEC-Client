@@ -3,13 +3,20 @@ import logging
 import os
 import sys
 import traceback
+from os.path import join, dirname, realpath
+
+from pkg_resources import resource_filename
+
 
 __author__ = 'pat'
 
 
 class PluginManager():
-    path = "plugins"
-    config = "plugins/plugin_config.json"
+    top_level = dirname(realpath(dirname(__file__)))
+    if "zip" in top_level:
+       top_level = realpath(dirname(top_level))
+    path = join(top_level, 'plugins')
+    config = "plugin_config.json"
 
     def __init__(self, send_command, echo):
         self.log = logging.getLogger(__name__)
@@ -17,7 +24,7 @@ class PluginManager():
         self.send_command = send_command
         self.echo = echo
 
-        data = open(self.config, 'r').read()
+        data = open(resource_filename(self.path, self.config), 'r').read()
         if data is None or len(data) == 0:
             self.plugin_enabled = {}
         else:
@@ -28,7 +35,9 @@ class PluginManager():
         self.post_process_plugins = []
         self.ui_plugins = []
         self.create_status_api()
+        self.setup()
 
+    def setup(self):
         for root, dirs, files in os.walk(self.path, topdown=True):
             for d in dirs:
                 self.find_plugins(self.path + "/" + d)
@@ -76,7 +85,7 @@ class PluginManager():
         return self.plugins
 
     def save_plugin_config(self):
-        config = open(self.config, 'w')
+        config = open(resource_filename(self.path, self.config), 'w')
         try:
             config.write(json.dumps(self.plugin_enabled, indent=4, sort_keys=True))
         finally:
