@@ -83,8 +83,6 @@ class Client:
                 buffer = str(self.socket.recv(4096), encoding='utf8')
             except Exception as exc:
                 pass
-                # pprint(exc.args)
-                # pprint("SOMETHING BAD HAPPENED")
             buffer = buffer.splitlines()
             if not buffer.__len__() == 0:
                 for number, line in enumerate(buffer):
@@ -99,8 +97,10 @@ class Client:
                             self.send("SECRET " + secret)
                             self.send("HASH " + zealous_hash)
                             self.send("CHAR ")
+                            # After a Zealotry login the server still sends a password prompt. This just responds to
+                            # that with a dummy entry.
+                            self.send("Nope")
             else:
-                # pprint(buffer)
                 break
         if self.connect:
             self.shutdown()
