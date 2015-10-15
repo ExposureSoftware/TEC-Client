@@ -207,12 +207,15 @@ class ClientUI(tk.Frame):
         # This is the side bar configuration.
         side_bar = tk.Frame(name="side_bar")
         side_bar.grid(row=0, column=3, rowspan=2, sticky=tk.S + tk.N)
+
         self.create_status_area(side_bar)
+
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
 
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
+        self.status_area.bind("<Button-1>", lambda command: self.send_command("condition"))
 
         self.status_area.create_rectangle(5, 5, 15, 105, fill="#3c0203", outline="#3c0203")
         self.status['health'] = self.status_area.create_rectangle(5, 5, 15, 105, fill="#e30101", outline="#e30101")
