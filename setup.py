@@ -1,8 +1,9 @@
-__author__ = 'ToothlessRebel'
+import sys
 from setuptools import find_packages
 from pkg_resources import resource_filename
-
 from cx_Freeze import setup, Executable
+
+__author__ = 'ToothlessRebel'
 
 build_exe_options = {
     "include_files": [
@@ -14,11 +15,11 @@ build_exe_options = {
 
 base = None
 # if sys.platform == "win32":
-# base = "Win32GUI"
+#     base = "Win32GUI"
 
 setup(
-    name="TEC Client",
-    version="0.5.2-alpha",
+    name="Centurion Client",
+    version="0.5.3-alpha",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options
@@ -30,7 +31,7 @@ setup(
             "main.py",
             base=base,
             icon=resource_filename('resources.images', 'eternal_logo.ico'),
-            targetName="TEC Client.exe",
+            targetName="Centurion Client.exe",
             packages=find_packages()
         )
     ]
