@@ -13,8 +13,6 @@ build_exe_options = {
 }
 
 base = None
-# if sys.platform == "win32":
-#     base = "Win32GUI"
 
 setup(
     name="Centurion Client",
@@ -29,7 +27,7 @@ setup(
         Executable(
             "main.py",
             base=base,
-            icon=resource_filename('resources.images', 'eternal_logo.ico'),
+            icon=resource_filename('resources.images', 'centurion.ico'),
             targetName="Centurion Client.exe",
             packages=find_packages()
         )

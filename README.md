@@ -15,7 +15,7 @@ Master|Dev
 
 ### Starting the Client
 1. Navigate to the install destination.
-2. Run `TEC Client.exe`
+2. Run `Centurion Client.exe`
 3. Follow prompts with your **account credentials**.
 
 ### Preferences

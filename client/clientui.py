@@ -5,6 +5,7 @@ import re
 from collections import deque
 import html.parser
 from math import floor
+from notes import Notes
 
 from preferences.preferences import Preferences
 
@@ -41,6 +42,7 @@ class ClientUI(tk.Frame):
         self.side_bar = master.children['side_bar']
         self.output_panel = master.children['output_frame'].children['output']
         self.input = master.children['input']
+        self.context_menu = master.children['context_menu']
 
         self.char_width = Font(self.output_panel, self.output_panel.cget("font")).measure('0')
         self.line_length = self.calc_line_length(self.output_panel.cget("width"))
@@ -222,6 +224,23 @@ class ClientUI(tk.Frame):
         self.create_compass_area(side_bar)
         self.create_map_area(side_bar)
 
+        # Build a context menu for the output pane.
+        context_menu = tk.Menu(self.master, tearoff=0, name="context_menu")
+        context_menu.add_command(label="Notes", command=self.notes)
+        context_menu.add_command(label="Define", state="disabled")
+
+        output.bind("<Button-3>", self.show_context)
+
+    def show_context(self, event):
+        selection = ''
+        try:
+            selection = self.output_panel.get('sel.first', 'sel.last')
+        except tk.TclError:
+            self.context_menu.entryconfig('Notes', state='disabled')
+        if len(selection):
+            self.context_menu.entryconfig('Notes', state='normal')
+        self.context_menu.post(event.x_root, event.y_root)
+
     def create_status_area(self, side_bar):
         self.status_area = tk.Canvas(side_bar, name="status_area", width=80, height=105, bg='black')
         self.status_area.bind("<Button-1>", lambda command: self.send_command("condition"))
@@ -291,6 +310,9 @@ class ClientUI(tk.Frame):
             self.map_area.create_line(coords[1][0], coords[1][1], coords[1][2], coords[1][3], fill=color, width=4)
             self.map_area.create_line(coords[0][0], coords[0][1], coords[0][2], coords[0][3], fill="black")
             self.map_area.create_line(coords[2][0], coords[2][1], coords[2][2], coords[2][3], fill="black")
+
+    def notes(self):
+        Notes(self.output_panel.get('sel.first', 'sel.last'))
 
     @staticmethod
     # Given an x,y coordinate, compute the black lines and white lines which define an exit in the given direction.
