@@ -4,7 +4,6 @@ import re
 from collections import deque
 import html.parser
 from math import floor
-import traceback
 
 from preferences.preferences import Preferences
 from plugin_manager.plugin_manager import PluginManager

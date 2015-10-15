@@ -4,7 +4,6 @@ from queue import Queue
 from time import sleep
 from threading import Thread
 from configparser import ConfigParser
-from plugin_manager.plugin_manager import PluginManager
 import logging
 import time
 import re
