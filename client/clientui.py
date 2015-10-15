@@ -160,13 +160,7 @@ class ClientUI(tk.Frame):
 
     def draw_output(self, text, tags=None):
         self.plugin_manager.pre_process(text, tags)
-        self.output_panel.configure(state="normal")
-        # scroll_position = self.output_panel.scrollbar.get()
-        try:
-            self.output_panel.insert(tk.END, text, tags)
-        except Exception:
-            self.log.error(traceback.format_exc())
-        self.output_panel.configure(state="disabled")
+        self.output_panel.insert(tk.END, text, tags)
         self.scroll_output()
         self.plugin_manager.post_process(text, tags)
 
