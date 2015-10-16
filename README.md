@@ -30,3 +30,10 @@ Logs are saved with file names formatted as `TECLogs<DD.MM.YYYY-HH.MM.SS>.txt` a
 ### The Client
 #### Input
 Use the up and down arrow keys to navigate the input buffer.
+
+#### Notes
+Highlight any text in the output pane and right-click your selection. A context menu will allow you
+to edit notes based on that selection.
+
+The text in the notes window can be freely edited as plain text. Upon closing the note will save. All notes
+can be found locally at `installed_directory/resources/notes/`.
