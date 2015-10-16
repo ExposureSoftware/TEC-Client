@@ -22,17 +22,15 @@ class PluginManager():
         self.send_command = send_command
         self.echo = echo
 
+        self.setup()
+
+    def setup(self):
         self.plugins = {}
         self.plugin_enabled = {}
         self.pre_process_plugins = []
         self.post_process_plugins = []
         self.ui_plugins = []
         self.create_status_api()
-        self.setup()
-
-    def setup(self):
-        self.plugins = {}
-        self.plugin_enabled = {}
         data = open(join(self.path, self.config), 'r').read()
         if data:
             self.plugin_enabled = json.loads(data)
@@ -41,6 +39,7 @@ class PluginManager():
             for d in dirs:
                 self.find_plugins(join(self.path, d))
         self.save_plugin_config()
+
 
     def find_plugins(self, current_path):
         sys.path.insert(0, current_path)
