@@ -1,4 +1,5 @@
-from tkinter import Toplevel, Frame, Text, INSERT
+from tkinter import Toplevel, Frame, Text, END
+from pkg_resources import resource_filename
 from pprint import pprint
 
 __author__ = 'ToothlessRebel'
@@ -7,34 +8,30 @@ __author__ = 'ToothlessRebel'
 class Notes(Frame):
     def __init__(self, phrase):
         super(Notes, self).__init__()
-        self.file = open('notes.txt', 'r+')
+        self.filename = resource_filename('resources.notes', phrase + '.txt')
         self.phrase = phrase
-        self.delimiter = self.file.readline()
-
-        widow = self.draw_window()
-        self.text = widow.children['note']
-        self.find_phrase(self.phrase)
+        self.window = self.draw_window()
+        self.text = self.window.children['note']
+        self.draw_note()
 
     def draw_window(self):
         window = Toplevel(self)
         window.wm_title('Notes on: ' + self.phrase)
+        window.protocol('WM_DELETE_WINDOW', self.save_note)
 
         text = Text(window, name="note")
         text.grid(row=0, column=0)
 
         return window
 
-    def find_phrase(self, phrase):
-        for line in self.file:
-            if not line.lower().strip() == phrase:
-                self.skip_section()
-            else:
-                for content in self.file:
-                    if content == self.delimiter:
-                        break
-                    self.text.insert(INSERT, content)
+    def draw_note(self):
+        file = open(self.filename, 'r')
+        self.text.insert('1.0', file.read())
+        file.close()
 
-    def skip_section(self):
-        line = self.file.readline()
-        while not line == self.delimiter:
-            line = self.file.readline()
+    def save_note(self):
+        note_text = self.text.get('1.0', END).strip()
+        file = open(self.filename, 'w')
+        file.write(note_text)
+        file.close()
+        self.window.destroy()
