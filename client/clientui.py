@@ -419,9 +419,14 @@ class ClientUI(tk.Frame):
                                               command=lambda name=plugin: self.toggle_plugin(name,
                                                                                              self.plugin_checkboxes[
                                                                                                  name].get()))
-        self.menu_plugins.add_command(label="Refresh", command=lambda mb=menu_bar: self.create_plugin_menu(menu_bar))
+        self.menu_plugins.add_command(label="Refresh", command=lambda mb=menu_bar: self.refresh_plugins(menu_bar))
 
         menu_bar.add_cascade(label="Plugins", menu=self.menu_plugins)
+
+    def refresh_plugins(self, menu_bar):
+        self.plugin_manager.setup()
+        self.create_plugin_menu(menu_bar)
+        self.create_plugin_area()
 
     def toggle_plugin(self, name, toggle_on):
         self.plugin_manager.toggle_plugin(name, toggle_on)
