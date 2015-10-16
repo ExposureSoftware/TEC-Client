@@ -3,10 +3,16 @@ from client import Client
 from pkg_resources import resource_filename
 import faulthandler
 import platform
+import sys
+import logging
 
 __author__ = 'ToothlessRebel'
 
-faulthandler.enable(open('crash_log.txt', 'w'))
+# Set up problem reporting
+sys.stderr = open('python.log', 'w')
+faulthandler.enable(open('python.log', 'w'))
+logging.basicConfig(filename='client.log', level=logging.DEBUG)
+
 root = Tk()
 root.wm_title("Centurion Client")
 icon = ''

@@ -15,9 +15,12 @@ build_exe_options = {
 
 base = None
 
+if sys.platform == 'win32':
+    base = 'Win32GUI'
+
 setup(
     name="Centurion Client",
-    version="0.6-alpha",
+    version="0.6",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options
