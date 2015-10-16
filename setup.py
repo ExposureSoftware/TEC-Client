@@ -18,7 +18,6 @@ base = None
 setup(
     name="Centurion Client",
     version="0.6",
-    version="0.6-alpha",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options
