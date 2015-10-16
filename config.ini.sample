@@ -2,7 +2,7 @@
 # This section determines client attributes.
 
 # Log level determines how much information is stored in various logs.
-# If you are having trouble with your client and wish to submit a bug report set this value to a minimum of 30.
+# If you are having trouble with your client and wish to submit a bug report set this value to a maximum of 30.
 #
 # Pre-defined levels
 #  CRITICAL 50
@@ -26,7 +26,7 @@ echo_input = yes
 
 # Should the client log your sessions?
 #
-logging = no
+log_session = no
 
 # The directory in which to store logs.
 #

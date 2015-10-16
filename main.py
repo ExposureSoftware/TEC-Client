@@ -5,13 +5,17 @@ import faulthandler
 import platform
 import sys
 import logging
+from configparser import ConfigParser
 
 __author__ = 'ToothlessRebel'
 
-# Set up problem reporting
+config = ConfigParser()
+if config.read('config.ini').__len__() < 1:
+    raise EnvironmentError
+
 sys.stderr = open('python.log', 'w')
 faulthandler.enable(open('python.log', 'w'))
-logging.basicConfig(filename='client.log', level=logging.DEBUG)
+logging.basicConfig(filename='client.log', level=config['CLIENT'].getint('log_level'))
 
 root = Tk()
 root.wm_title("Centurion Client")
