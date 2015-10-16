@@ -5,8 +5,6 @@ import sys
 import traceback
 from os.path import join, dirname, realpath
 
-from pkg_resources import resource_filename
-
 
 __author__ = 'pat'
 
@@ -14,7 +12,7 @@ __author__ = 'pat'
 class PluginManager():
     top_level = dirname(realpath(dirname(__file__)))
     if "zip" in top_level:
-       top_level = realpath(dirname(top_level))
+        top_level = realpath(dirname(top_level))
     path = join(top_level, 'plugins')
     config = "plugin_config.json"
 
@@ -24,13 +22,8 @@ class PluginManager():
         self.send_command = send_command
         self.echo = echo
 
-        data = open(resource_filename(self.path, self.config), 'r').read()
-        if data is None or len(data) == 0:
-            self.plugin_enabled = {}
-        else:
-            self.plugin_enabled = json.loads(data)
         self.plugins = {}
-
+        self.plugin_enabled = {}
         self.pre_process_plugins = []
         self.post_process_plugins = []
         self.ui_plugins = []
@@ -38,9 +31,15 @@ class PluginManager():
         self.setup()
 
     def setup(self):
+        self.plugins = {}
+        self.plugin_enabled = {}
+        data = open(join(self.path, self.config), 'r').read()
+        if data:
+            self.plugin_enabled = json.loads(data)
+
         for root, dirs, files in os.walk(self.path, topdown=True):
             for d in dirs:
-                self.find_plugins(self.path + "/" + d)
+                self.find_plugins(join(self.path, d))
         self.save_plugin_config()
 
     def find_plugins(self, current_path):
@@ -85,7 +84,7 @@ class PluginManager():
         return self.plugins
 
     def save_plugin_config(self):
-        config = open(resource_filename(self.path, self.config), 'w')
+        config = open(join(self.path, self.config), 'w')
         try:
             config.write(json.dumps(self.plugin_enabled, indent=4, sort_keys=True))
         finally:

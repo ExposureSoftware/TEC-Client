@@ -427,6 +427,7 @@ class ClientUI(tk.Frame):
     def refresh_plugins(self, menu_bar):
         self.plugin_manager.setup()
         self.create_plugin_menu(menu_bar)
+        self.create_plugin_area()
 
     def toggle_plugin(self, name, toggle_on):
         self.plugin_manager.toggle_plugin(name, toggle_on)
