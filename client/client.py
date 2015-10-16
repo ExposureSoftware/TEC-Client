@@ -20,7 +20,6 @@ __author__ = 'ToothlessRebel'
 class Client:
     def __init__(self, master):
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.DEBUG)
         self.log.warning('Starting logger.')
         self.master = master
         self.queue = Queue()
@@ -77,6 +76,7 @@ class Client:
         socket.connect(self.socket, ("tec.skotos.net", 6730))
         self.login_user()
         if self.connect:
+            self.log.info('Sending Zealous protocol.')
             self.send("SKOTOS Zealous 0.7.12.2\n")
         while self.connect:
             buffer = ""
@@ -109,6 +109,7 @@ class Client:
 
     def login_user(self):
         self.ui.interrupt_input = True
+        self.log.debug('Requesting credentials.')
         self.ui.draw_output('\nPlease enter your user name:')
         while self.ui.interrupt_buffer.__len__() < 1 and self.connect:
             sleep(0.5)
@@ -116,6 +117,7 @@ class Client:
             self.ui.draw_output('\nPlease enter your password:')
         while self.ui.interrupt_buffer.__len__() < 2 and self.connect:
             sleep(0.5)
+        self.log.debug('Attempting to verify credentials.')
         if self.connect:  # If the client has stopped during the pause, don't try and send commands.
             self.ui.draw_output('\nSigning in...')
 
@@ -133,6 +135,7 @@ class Client:
             }
             url = 'https://www.skotos.net/user/login.php'
             response = requests.post(url, headers=header, data=data, allow_redirects=False, verify=False)
+            self.log.debug('Got a response.')
             try:
                 self.uname = re.search('user=(.*?);', response.headers['set-cookie']).group(1)
                 self.pwd = re.search('pass=(.*?);', response.headers['set-cookie']).group(1)

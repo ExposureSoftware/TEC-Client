@@ -7,13 +7,12 @@ import traceback
 __author__ = 'pat'
 
 
-class PluginManager():
+class PluginManager:
     path = "plugins"
     config = "plugins/plugin_config.json"
 
     def __init__(self, send_command, echo):
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.DEBUG)
         self.send_command = send_command
         self.echo = echo
 
