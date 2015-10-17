@@ -1,21 +1,27 @@
 from tkinter import Tk
 from client import Client
-from pkg_resources import resource_filename
+from configparser import ConfigParser
+from appdirs import AppDirs
 import faulthandler
 import platform
 import sys
 import logging
-from configparser import ConfigParser
 
 __author__ = 'ToothlessRebel'
 
+dirs = AppDirs('Centurion Client', 'Exposure Software')
+config_file = dirs.user_config_dir + '\\config.ini'
+log_file_python = dirs.user_log_dir + '\\python.log'
+log_file_client = dirs.user_log_dir + '\\client.log'
+resources_dir = dirs.user_data_dir + '\\'
+
 config = ConfigParser()
-if config.read('config.ini').__len__() < 1:
+if config.read(config_file).__len__() < 1:
     raise EnvironmentError
 
-sys.stderr = open('python.log', 'w')
-faulthandler.enable(open('python.log', 'w'))
-logging.basicConfig(filename='client.log', level=config['CLIENT'].getint('log_level'))
+sys.stderr = open(log_file_python, 'w')
+faulthandler.enable(open(log_file_python, 'w'))
+logging.basicConfig(filename=log_file_client, level=config['CLIENT'].getint('log_level'))
 
 root = Tk()
 root.wm_title("Centurion Client")
@@ -26,6 +32,7 @@ if system == "Windows":
     icon = 'centurion.ico'
 elif system == "Linux":
     icon = 'centurion.xbm'
-root.wm_iconbitmap(root, resource_filename('resources.images', icon))
+
+root.wm_iconbitmap(root, resources_dir + 'images\\' + icon)
 client = Client(root)
 root.mainloop()
