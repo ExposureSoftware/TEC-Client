@@ -38,29 +38,17 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 [Files]
 Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\Centurion Client.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\config.ini"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\resources\images\*"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}\resources\images"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\resources\notes\*"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}\resources\notes"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_bz2.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_ctypes.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_hashlib.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_lzma.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_socket.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_ssl.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\_tkinter.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\library.zip"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\pyexpat.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\python33.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\pythoncom33.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\pywintypes33.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\select.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\tcl85.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\tk85.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\unicodedata.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\win32api.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\win32com.shell.shell.pyd"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\win32wnet.pyd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\resources\images\*"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}\resources\images"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\resources\notes\*"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}\resources\notes"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\plugins\plugin_config.json"; DestDir: "{localappdata}\{#MyAppPublisher}\{#MyAppName}"; Flags: ignoreversion
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\tcl\*"; DestDir: "{app}\tcl"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\tk\*"; DestDir: "{app}\tk"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Marshall\Documents\Code\Python Code\TEC Client\build\exe.win-amd64-3.3\*"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Dirs]
+Name: "{localappdata}\{#MyAppPublisher}\{#MyAppName}\Logs"
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

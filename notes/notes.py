@@ -1,15 +1,25 @@
 from tkinter import Toplevel, Frame, Text, END
-from pkg_resources import resource_filename
 import string
+import sys
+from appdirs import AppDirs
 
 __author__ = 'ToothlessRebel'
 
 
 class Notes(Frame):
     def __init__(self, phrase):
+        try:
+            if sys.frozen is True:
+                dirs = AppDirs('Centurion Client', 'Exposure Software')
+                resources_dir = dirs.user_data_dir + '\\resources\\'
+            else:
+                resources_dir = 'resources\\'
+        except AttributeError:
+            resources_dir = 'resources\\'
+
         super(Notes, self).__init__()
         self.phrase = phrase.lower().strip().replace(' ', '_')
-        self.filename = resource_filename('resources.notes', self.phrase + '.txt')
+        self.filename = resources_dir + "notes\\" + self.phrase + '.txt'
         self.window = self.draw_window()
         self.text = self.window.children['note']
         self.draw_note()
