@@ -62,5 +62,5 @@ target/
 # Project Files
 crash_log.txt
 myconfig.ini
-config.ini
 resources/notes/*.txt
+config.ini
