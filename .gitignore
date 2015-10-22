@@ -63,3 +63,4 @@ target/
 crash_log.txt
 myconfig.ini
 config.ini
+resources/notes/*.txt
