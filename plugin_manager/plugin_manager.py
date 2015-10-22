@@ -5,11 +5,10 @@ import sys
 import traceback
 from os.path import join, dirname, realpath
 
-
 __author__ = 'pat'
 
 
-class PluginManager():
+class PluginManager:
     top_level = dirname(realpath(dirname(__file__)))
     if "zip" in top_level:
         top_level = realpath(dirname(top_level))
@@ -18,7 +17,6 @@ class PluginManager():
 
     def __init__(self, send_command, echo):
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.DEBUG)
         self.send_command = send_command
         self.echo = echo
 
@@ -39,7 +37,6 @@ class PluginManager():
             for d in dirs:
                 self.find_plugins(join(self.path, d))
         self.save_plugin_config()
-
 
     def find_plugins(self, current_path):
         sys.path.insert(0, current_path)
