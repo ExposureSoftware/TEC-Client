@@ -1,6 +1,6 @@
+appdirs==1.4.0
 cx-Freeze==4.3.3
 inflect==0.2.5
-irc==12.1.1
 jaraco.apt==1.0
 jaraco.classes==1.2
 jaraco.collections==1.1

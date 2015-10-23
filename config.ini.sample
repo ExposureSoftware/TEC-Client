@@ -1,15 +1,37 @@
+[CLIENT]
+# This section determines client attributes.
+
+# Log level determines how much information is stored in various logs.
+# If you are having trouble with your client and wish to submit a bug report set this value to a maximum of 30.
+#
+# Pre-defined levels
+#  CRITICAL 50
+#  ERROR    40
+#  WARNING  30
+#  INFO     20
+#  DEBUG    10
+#
+log_level = 40
+
 [UI]
 # This section deals with UI configuration values.
 
 # If 'yes' the input commands will be echoed to the client in italics on entry.
+#
 echo_input = yes
 
 [logging]
 # This section deals with all logging configuration. 'Logging' in this case refers to client logging for
 # reference. This is not crash/debug/diagnostic logging.
 
+# Should the client log your sessions?
+#
+log_session = no
+
 # The directory in which to store logs.
+#
 log_directory =
 
 # The format to use for log file names.
+#
 log_name_format =
