@@ -1,3 +1,4 @@
+#! python
 import sys
 from setuptools import find_packages
 from pkg_resources import resource_filename
@@ -25,6 +26,7 @@ setup(
     options={
         "build_exe": build_exe_options
     },
+    test_suite="tests",
     packages=find_packages(),
     package_data={'': ['*.png', '*.gif', '*.ico']},
     executables=[

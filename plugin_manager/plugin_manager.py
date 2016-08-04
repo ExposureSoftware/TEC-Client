@@ -27,15 +27,17 @@ class PluginManager:
         self.log = logging.getLogger(__name__)
         self.send_command = send_command
         self.echo = echo
-
-        self.setup()
-
-    def setup(self):
         self.plugins = {}
         self.plugin_enabled = {}
         self.pre_process_plugins = []
         self.post_process_plugins = []
         self.ui_plugins = []
+        self.status_plugins = {}
+        self.status_plugins_api_names = {}
+
+        self.setup()
+
+    def setup(self):
         self.create_status_api()
         data = open(self.config, 'r').read()
         if data:
@@ -98,7 +100,7 @@ class PluginManager:
         self.plugin_enabled[name] = is_enabled
         self.save_plugin_config()
 
-    ### Line Processing
+    # Line Processing
     def pre_process(self, line, tags):
         for name in self.pre_process_plugins:
             if self.plugin_enabled[name]:
@@ -121,7 +123,7 @@ class PluginManager:
                     self.log.error(name + " Failure")
                     self.log.error(traceback.format_exc())
 
-    ### Plugin UI Handling
+    # Plugin UI Handling
     def create_plugin_area(self, plugin_area):
         for name in self.ui_plugins:
             if self.plugin_enabled[name]:
@@ -131,7 +133,7 @@ class PluginManager:
                     self.log.error(name + " Failure")
                     self.log.error(traceback.format_exc())
 
-    ### Status Update API
+    # Status Update API
     def create_status_api(self):
         self.status_plugins = {'Health': [], 'Fatigue': [], 'Encumbrance': [], 'Satiation': []}
         self.status_plugins_api_names = {'Health': 'health_update', 'Fatigue': 'fatigue_update',

@@ -6,6 +6,7 @@ It is designed to mimic the Zealotry client in every way.
 Master|Dev
 -------|------
 [![Build Status](https://travis-ci.org/ExposureSoftware/TEC-Client.svg?branch=master)](https://travis-ci.org/ExposureSoftware/TEC-Client)|[![Build Status](https://travis-ci.org/ExposureSoftware/TEC-Client.svg?branch=dev)](https://travis-ci.org/ExposureSoftware/TEC-Client)
+[![Coverage Status](https://coveralls.io/repos/github/ExposureSoftware/TEC-Client/badge.svg)](https://coveralls.io/github/ExposureSoftware/TEC-Client)|[![Coverage Status Dev](https://coveralls.io/repos/github/ExposureSoftware/TEC-Client/badge.svg?branch=dev)](https://coveralls.io/github/ExposureSoftware/TEC-Client?branch=dev)
 
 ## Installation
 1. Download the installer (file extension .msi) for the [latest release](https://github.com/ExposureSoftware/TEC-Client/releases).
