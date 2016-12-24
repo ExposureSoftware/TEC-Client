@@ -21,7 +21,7 @@ if sys.platform == 'win32':
 
 setup(
     name="Centurion Client",
-    version="0.6",
+    version="0.6.1",
     description="TEC Client in Python",
     options={
         "build_exe": build_exe_options

@@ -12,3 +12,4 @@ tempora==1.2
 virtualenv==14.0.5
 yg.lockfile==2.0
 zc.lockfile==1.1.0
+pyglet==1.2.4

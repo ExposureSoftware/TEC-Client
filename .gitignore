@@ -64,3 +64,6 @@ crash_log.txt
 myconfig.ini
 resources/notes/*.txt
 config.ini
+
+#Non-Default Plugins
+plugins/*
