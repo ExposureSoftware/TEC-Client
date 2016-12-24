@@ -43,14 +43,16 @@ class PluginManager:
 
         for root, dirs, files in os.walk(self.path, topdown=True):
             for d in dirs:
-                self.find_plugins(join(self.path, d))
+                if "__" not in d and "test" not in d and "pyglet" not in d:
+                    self.find_plugins(join(self.path, d))
         self.save_plugin_config()
 
     def find_plugins(self, current_path):
         sys.path.insert(0, current_path)
         for root, dirs, files in os.walk(current_path, topdown=True):
+            dirs[:] = [dir for dir in dirs if "__" not in dir and "test" not in dir and "pyglet" not in dir]
             for name in files:
-                if name.endswith(".py"):
+                if name.endswith("_plugin.py"):
                     name = name.strip(".py")
                     try:
                         mod = __import__(name)
